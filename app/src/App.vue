@@ -41,7 +41,7 @@ export default {
       });
       if (file) {
         this.folder = file;
-        await store.set('folder', {value: this.folder});
+        await store.set('folder', {value: this.folder.value});
         await store.save();
         this.watchFolder();
       }
@@ -113,24 +113,34 @@ export default {
 
 <template>
   <div class="container">
-    <h1>Welcome to Tauri!</h1>
+    <div class="container-home">
+    </div>
+    <div class="container-settings">
+      <ul>
+        <li>
+          <label>Folder</label>
+          <input v-model="folder" readonly>
+          <button @click="handlerFolder">Folder</button>
+        </li>
+        <li>
+          <label>folderPrefixTeacher:</label>
+          <input v-model="folderPrefixTeacher">
+        </li>
+        <li>
+          <label>folderPrefixPupil:</label>
+          <input v-model="folderPrefixPupil">
+        </li>
+        <li>
+          <label>apiUrl:</label>
+          <input v-model="apiUrl">
+        </li>
+        <li>
+          <label>apiKey:</label>
+          <input v-model="apiKey">
+        </li>
+      </ul>
+    </div>
 
-    <button @click="handlerFolder">Folder</button>
-    {{ folder }}
-
-    <br>
-
-    <label>folderPrefixTeacher:</label>
-    <input v-model="folderPrefixTeacher">
-    <br>
-    <label>folderPrefixPupil:</label>
-    <input v-model="folderPrefixPupil">
-    <br>
-    <label>apiUrl:</label>
-    <input v-model="apiUrl">
-    <br>
-    <label>apiKey:</label>
-    <input v-model="apiKey">
   </div>
 </template>
 

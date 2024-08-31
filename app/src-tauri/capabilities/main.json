@@ -29,7 +29,11 @@
       "identifier": "http:default",
       "allow": [{ "url": "https://*.*.de" }],
       "deny": [{ "url": "https://private.tauri.app" }]
-    }
+    },
+    "http:allow-fetch",
+    "http:allow-fetch-read-body",
+    "http:allow-fetch-send",
+    "upload:allow-upload"
 
   ]
 }

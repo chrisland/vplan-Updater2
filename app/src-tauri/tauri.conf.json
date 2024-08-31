@@ -18,8 +18,8 @@
     "createUpdaterArtifacts": "v1Compatible"
   },
   "productName": "schuleintern-vplan-updater",
-  "version": "0.0.0",
-  "identifier": "com.tauri.dev",
+  "version": "0.0.1",
+  "identifier": "de.schuleintern.vplanupdater",
   "plugins": {},
   "app": {
     "security": {
@@ -28,8 +28,8 @@
     "windows": [
       {
         "title": "schuleintern-vplan-updater",
-        "width": 800,
-        "height": 600
+        "width": 250,
+        "height": 400
       }
     ]
   }

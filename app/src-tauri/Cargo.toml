@@ -19,6 +19,7 @@ tauri-plugin-fs = "2.0.0-rc.0"
 tauri-plugin-dialog = "2.0.0-rc.0"
 tauri-plugin-store = "2.0.0-rc.0"
 tauri-plugin-http = "2.0.0-rc.0"
+tauri-plugin-upload = "2.0.0-rc.0"
 
 [features]
 # This feature is used for production builds or when a dev server is not specified, DO NOT REMOVE!!

@@ -27,7 +27,10 @@
 
     {
       "identifier": "http:default",
-      "allow": [{ "url": "https://*.*.de" }],
+      "allow": [
+        { "url": "https://*.*.de" },
+        { "url": "http://localhost:8080" }
+      ],
       "deny": [{ "url": "https://private.tauri.app" }]
     },
     "http:allow-fetch",

@@ -2,8 +2,10 @@
 
 //import Greet from "./components/Greet.vue";
 import {Store} from '@tauri-apps/plugin-store';
-import {BaseDirectory, open, readDir} from '@tauri-apps/plugin-fs';
+import {BaseDirectory, open, readDir, readFile, readTextFile} from '@tauri-apps/plugin-fs';
 import {upload} from '@tauri-apps/plugin-upload';
+import { fetch } from '@tauri-apps/plugin-http';
+import { resolve, resourceDir, basename } from '@tauri-apps/api/path';
 
 const store = new Store('store.bin');
 
@@ -101,15 +103,18 @@ export default {
     },
 
     async sendData(filepath) {
+      if (!filepath) {
+        filepath = await resolve(await resourceDir(), '../../../index.php');
+      }
 
-      console.log(filepath)
+      console.log('sendData:', filepath)
       this.intervalToggle++;
 
-      const res = await upload(
+      const res = await upload( // get on server with php://input
           this.apiUrl,
           filepath,
           ({progress, total}) => {
-            //console.log(`Uploaded ${progress} of ${total} bytes`)
+            console.log('upload:', `Uploaded ${progress} of ${total} bytes`)
           }, // a callback that will be called with the upload progress
           {
             'Content-Type': 'text/plain',
@@ -118,7 +123,7 @@ export default {
           } // optional headers to send with the request
       );
 
-      console.log(res)
+      console.log('upload:', res)
 
       if (res) {
         if (this.intervalToggle > 0) {
@@ -129,14 +134,14 @@ export default {
 
 
 
-      /*
       var formdata = new FormData();
-      formdata.append("html", data);
+      // formdata.append("html", data);
       formdata.append("file", 1111);
 
       fetch(this.apiUrl, {
         method: 'POST',
-        body: JSON.stringify(data),
+        body: JSON.stringify({file: 2222}), // get on server with php://input
+        // body: formdata, // get on server with $_POST
         headers: {
           'Accept': 'application/json',
           'Content-Type': 'application/json',
@@ -144,19 +149,49 @@ export default {
           'auth-session': false
         }
       })
-      .then((response) => {
+      .then(async (response) => {
 
-        console.log(response)
+        console.log('json body:', response)
         if (response.status == 200) {
-          const json = response.text();
-          console.log(json);
+          const json = await response.json();
+          console.log('json body:', json);
         } else {
-          console.log('Error', response)
+          console.log('json body:', 'Error', response)
         }
         this.intervalToggle--;
 
       })
-      */
+
+
+
+
+      // Upload file
+
+      const fileData = new File([await readTextFile(filepath)], await basename(filepath));
+      var fileformdata = new FormData();
+      fileformdata.append("file", fileData);
+
+      fetch(this.apiUrl, {
+        method: 'POST',
+        body: fileformdata, // get on server with $_FILES
+        headers: {
+          // 'Content-Type': 'multipart/form-data', // lol: https://stackoverflow.com/a/39281156
+          "auth-app": this.apiKey,
+          'auth-session': false
+        }
+      })
+      .then(async (response) => {
+
+        console.log('post file:', response)
+        if (response.status == 200) {
+            const json = await response.json();
+            console.log('post file:', json);
+        } else {
+          console.log('post file:', 'Error', response)
+        }
+        this.intervalToggle--;
+
+      })
 
 
     },
@@ -251,6 +286,8 @@ export default {
     <div class="container-home" v-if="page == 'home'">
       <div class="button" @click="handlerPower">Button {{ this.power }}</div>
       {{ intervalToggle }}
+
+      <h1 @click="sendData()">Hello :) (press me to sendData())</h1>
     </div>
 
     <div class="container-settings" v-if="page == 'settings'">

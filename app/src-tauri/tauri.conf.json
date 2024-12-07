@@ -15,22 +15,22 @@
       "icons/icon.icns",
       "icons/icon.ico"
     ],
-    "createUpdaterArtifacts": "v1Compatible"
+    "resources": []
   },
-  "productName": "schuleintern-vplan-updater",
+  "productName": "V-Plan Updater",
   "version": "0.0.1",
   "identifier": "de.schuleintern.vplanupdater",
-  "plugins": {},
   "app": {
     "security": {
       "csp": null
     },
     "windows": [
       {
-        "title": "schuleintern-vplan-updater",
-        "width": 250,
+        "title": "V-Plan Updater - Schule-Intern",
+        "width": 230,
         "height": 400
       }
     ]
-  }
+  },
+  "plugins": {}
 }

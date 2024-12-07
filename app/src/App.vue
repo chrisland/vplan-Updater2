@@ -1,11 +1,13 @@
 <script>
 
+
 //import Greet from "./components/Greet.vue";
 import {Store} from '@tauri-apps/plugin-store';
-import {BaseDirectory, open, readDir, readFile, readTextFile} from '@tauri-apps/plugin-fs';
+import {BaseDirectory, readDir} from '@tauri-apps/plugin-fs';
 import {upload} from '@tauri-apps/plugin-upload';
-import { fetch } from '@tauri-apps/plugin-http';
-import { resolve, resourceDir, basename } from '@tauri-apps/api/path';
+//import { fetch } from '@tauri-apps/plugin-http';
+//import { resolve, resourceDir, basename } from '@tauri-apps/api/path';
+import {open} from '@tauri-apps/plugin-dialog';
 
 const store = new Store('store.bin');
 
@@ -16,11 +18,14 @@ export default {
       page: "home",
       interval: false,
       intervalToggle: 0,
+      intervalTime: 5000,
+      lastUpload: '',
 
+      intervalMin: '',
       folder: "",
       folderPrefixTeacher: "",
       folderPrefixPupil: "",
-      apiUrl: "https://www.schule-intern.de/rest.php/vplan/updater",
+      apiUrl: "",
       apiKey: "",
       power: false
     };
@@ -39,62 +44,35 @@ export default {
       this.folderPrefixPupil = await store.get('folderPrefixPupil');
       this.apiUrl = await store.get('apiUrl');
       this.apiKey = await store.get('apiKey');
+      this.intervalMin = await store.get('intervalMin');
+      this.intervalTime = await store.get('intervalTime');
+      this.lastUpload = await store.get('lastUpload');
 
       this.watchFolder();
 
     },
     async handlerFolder() {
 
-
       const file = await open({
         multiple: false,
         directory: true,
       });
-      //console.log(file)
       if (file) {
         this.folder = file;
         await store.set('folder', file);
         await store.save();
-
       }
 
-
     },
-    getFolderNames (name) {
-      return [ this.folderPrefixTeacher+'heute', this.folderPrefixTeacher+'morgen', this.folderPrefixPupil+'heute', this.folderPrefixPupil+'morgen' ];
+    getFolderNames(name) {
+      return [this.folderPrefixTeacher + 'heute', this.folderPrefixTeacher + 'morgen', this.folderPrefixPupil + 'heute', this.folderPrefixPupil + 'morgen'];
     },
     async watchFolder() {
 
-      //console.log('watch-0', this.power)
-
       if (this.power) {
-        if (this.folder && this.apiUrl && this.apiKey) {
-
-
-          //console.log('watch-1', this.folder)
-          //console.log('watch-2', this.apiUrl)
-          //console.log('watch-3', this.apiKey)
-
-
-          this.interval = setInterval(this.handlerInterval, 5000);
-
-          //console.log(this.interval)
-
-
-          /*
-          await watch(
-              this.folder.value,
-              (event) => {
-                console.log('app.log event', event);
-              },
-              {
-                baseDir: BaseDirectory.AppLog,
-                recursive: true,
-              }
-          );
-          */
-
-
+        if (this.folder && this.apiUrl && this.apiKey && this.intervalTime) {
+          console.log(this.intervalTime)
+          this.interval = setInterval(this.handlerInterval, this.intervalTime);
         } else {
           this.handlerPage('settings');
         }
@@ -102,141 +80,93 @@ export default {
 
     },
 
-    async sendData(filepath) {
+    async sendData(folder, file) {
+
+      const filepath = this.folder + '/' + folder + '/' + file;
       if (!filepath) {
-        filepath = await resolve(await resourceDir(), '../../../index.php');
+        return false;
+      }
+      let type = '';
+      if (folder == this.folderPrefixTeacher + 'heute') {
+        type = 'lehrerheute';
+      }
+      if (folder == this.folderPrefixTeacher + 'morgen') {
+        type = 'lehrermorgen';
+      }
+      if (folder == this.folderPrefixPupil + 'heute') {
+        type = 'schuelerheute';
+      }
+      if (folder == this.folderPrefixPupil + 'morgen') {
+        type = 'schuelermorgen';
       }
 
-      console.log('sendData:', filepath)
-      this.intervalToggle++;
+      if (type) {
+        //console.log('sendData:', filepath)
+        this.intervalToggle++;
 
-      const res = await upload( // get on server with php://input
-          this.apiUrl,
-          filepath,
-          ({progress, total}) => {
-            console.log('upload:', `Uploaded ${progress} of ${total} bytes`)
-          }, // a callback that will be called with the upload progress
-          {
-            'Content-Type': 'text/plain',
-            "auth-app": this.apiKey,
-            'auth-session': "false"
-          } // optional headers to send with the request
-      );
+        const res = await upload( // get on server with php://input
+            this.apiUrl + '/' + type + '/' + file,
+            filepath,
+            ({progress, total}) => {
+              console.log('upload:', `Uploaded ${progress} of ${total} bytes`)
+            }, // a callback that will be called with the upload progress
+            {
+              'Content-Type': 'text/plain',
+              "auth-app": this.apiKey,
+              'auth-session': "false"
+            } // optional headers to send with the request
+        );
 
-      console.log('upload:', res)
+        //console.log('upload:', res)
 
-      if (res) {
-        if (this.intervalToggle > 0) {
-          this.intervalToggle--;
+        if (res) {
+          if (this.intervalToggle > 0) {
+            this.intervalToggle--;
+            this.lastUpload = this.getCurrentTimeInGermanFormat();
+            store.set('lastUpload', this.lastUpload);
+          }
         }
       }
 
 
-
-
-      var formdata = new FormData();
-      // formdata.append("html", data);
-      formdata.append("file", 1111);
-
-      fetch(this.apiUrl, {
-        method: 'POST',
-        body: JSON.stringify({file: 2222}), // get on server with php://input
-        // body: formdata, // get on server with $_POST
-        headers: {
-          'Accept': 'application/json',
-          'Content-Type': 'application/json',
-          "auth-app": this.apiKey,
-          'auth-session': false
-        }
-      })
-      .then(async (response) => {
-
-        console.log('json body:', response)
-        if (response.status == 200) {
-          const json = await response.json();
-          console.log('json body:', json);
-        } else {
-          console.log('json body:', 'Error', response)
-        }
-        this.intervalToggle--;
-
-      })
-
-
-
-
-      // Upload file
-
-      const fileData = new File([await readTextFile(filepath)], await basename(filepath));
-      var fileformdata = new FormData();
-      fileformdata.append("file", fileData);
-
-      fetch(this.apiUrl, {
-        method: 'POST',
-        body: fileformdata, // get on server with $_FILES
-        headers: {
-          // 'Content-Type': 'multipart/form-data', // lol: https://stackoverflow.com/a/39281156
-          "auth-app": this.apiKey,
-          'auth-session': false
-        }
-      })
-      .then(async (response) => {
-
-        console.log('post file:', response)
-        if (response.status == 200) {
-            const json = await response.json();
-            console.log('post file:', json);
-        } else {
-          console.log('post file:', 'Error', response)
-        }
-        this.intervalToggle--;
-
-      })
 
 
     },
 
+    getCurrentTimeInGermanFormat() {
+      const now = new Date();
+
+      const day = String(now.getDate()).padStart(2, '0');
+      const month = String(now.getMonth() + 1).padStart(2, '0'); // Monate sind 0-indexiert
+      const year = now.getFullYear();
+
+      const hours = String(now.getHours()).padStart(2, '0');
+      const minutes = String(now.getMinutes()).padStart(2, '0');
+      const seconds = String(now.getSeconds()).padStart(2, '0');
+
+      //return `${day}.${month}.${year} ${hours}:${minutes}:${seconds}`;
+      return `${day}.${month}. ${hours}:${minutes}`;
+    },
     handlerInterval() {
 
-      //console.log('intrval');
+      if (this.power) {
 
-
-      readDir(this.folder, {baseDir: BaseDirectory.Home}).then((folders) => {
-
-
-        folders.forEach((folder) => {
-          if (folder.isDirectory) {
-
-            if (this.getFolderNames().includes(folder.name)) {
-
-              readDir(this.folder + '/' + folder.name, {baseDir: BaseDirectory.Home}).then((files) => {
-
-                files.forEach(async (file) => {
-                  if (file.isFile) {
-
-                    //console.log(this.folder+'/'+folder.name+'/'+file.name)
-                    /*
-                        const contents = await open(this.folder + '/' + folder.name + '/' + file.name, {baseDir: BaseDirectory.Home});
-                        const buf = new Uint8Array(50000);
-                        const numberOfBytesRead = await contents.read(buf); // 11 bytes
-                        const text = new TextDecoder().decode(buf);  // "hello world"
-                        await contents.close();
-                    */
-
-
-                    this.sendData(this.folder + '/' + folder.name + '/' + file.name);
-
-                  }
-                })
-              });
-
-
+        readDir(this.folder, {baseDir: BaseDirectory.Home}).then((folders) => {
+          folders.forEach((folder) => {
+            if (folder.isDirectory) {
+              if (this.getFolderNames().includes(folder.name)) {
+                readDir(this.folder + '/' + folder.name, {baseDir: BaseDirectory.Home}).then((files) => {
+                  files.forEach(async (file) => {
+                    if (folder.name && file.name && file.isFile) {
+                      this.sendData(folder.name, file.name );
+                    }
+                  })
+                });
+              }
             }
-          }
-        })
-      });
-      //this.intervalToggle = false;
-
+          })
+        });
+      }
 
     },
 
@@ -246,9 +176,15 @@ export default {
       store.set('folderPrefixPupil', this.folderPrefixPupil);
       store.set('apiUrl', this.apiUrl);
       store.set('apiKey', this.apiKey);
+      store.set('intervalMin', this.intervalMin);
+      if (this.intervalMin) {
+        this.intervalTime = this.intervalMin * 60 * 1000;
+        store.set('intervalTime', this.intervalTime);
+      }
       store.save();
 
       this.handlerPage();
+      this.handlerPower();
     },
 
     handlerPower() {
@@ -259,8 +195,8 @@ export default {
       if (this.power) {
         this.load();
       } else {
+        console.log('kill', this.interval)
         clearInterval(this.interval);
-
       }
 
     },
@@ -278,50 +214,184 @@ export default {
 </script>
 
 <template>
-  <div class="container">
+
+
+  <div class="container container-home" v-if="page == 'home'">
     <div class="header">
-      <button @click="handlerPage('home')">Home</button>
-      <button @click="handlerPage('settings')">Settings</button>
+      <div class="logo"></div>
+      <button class="si-btn si-btn-icon si-btn-border icon-settings" @click="handlerPage('settings')"></button>
     </div>
-    <div class="container-home" v-if="page == 'home'">
-      <div class="button" @click="handlerPower">Button {{ this.power }}</div>
-      {{ intervalToggle }}
-
-      <h1 @click="sendData()">Hello :) (press me to sendData())</h1>
+    <div class="main">
+      <div class="">
+        <div class="power" :class="{'active' : this.power == true}" @click="handlerPower"></div>
+        <div v-if="!this.power" class="mainMain"><b>Aus</b></div>
+        <div v-else-if="lastUpload" class="mainMain">Letzter Upload:<br>{{lastUpload}}</div>
+      </div>
     </div>
+    <footer>
+      <div v-if="intervalToggle > 1"><b>Status:</b> ({{intervalToggle}}) Daten werden übertragen...</div>
+      <div v-if="power">Synchronisierung alle {{intervalMin}} Minuten</div>
+      <div v-else>Synchronisierung: Aus</div>
+    </footer>
+  </div>
 
-    <div class="container-settings" v-if="page == 'settings'">
-      <ul>
+  <div class="container container-settings" v-if="page == 'settings'">
+    <div class="header">
+      <button class="si-btn si-btn-icon si-btn-border icon-back" @click="handlerPage('home')"></button>
+      <button class="si-btn si-btn-icon si-btn-green margin-l-s icon-save" @click="handlerSave"></button>
+    </div>
+    <div class="main">
+      <ul class="noListStyle">
         <li>
-          <label>Folder</label>
-          <input v-model="folder" readonly>
-          <button @click="handlerFolder">Folder</button>
+          <label>Interval in Minuten</label>
+          <input v-model="intervalMin" placeholder="120">
+          <div class="text-small">{{intervalTime}} Millisekunden</div>
         </li>
         <li>
-          <label>folderPrefixTeacher:</label>
-          <input v-model="folderPrefixTeacher">
+          <label>Lokaler Ordner</label>
+          <input v-model="folder" readonly @click="handlerFolder" class="curser">
         </li>
         <li>
-          <label>folderPrefixPupil:</label>
-          <input v-model="folderPrefixPupil">
+          <label>Ordner Prefix Lehrer/innen</label>
+          <input v-model="folderPrefixTeacher" placeholder="prefix_">
         </li>
         <li>
-          <label>apiUrl:</label>
-          <input v-model="apiUrl">
+          <label>Ordner Prefix Schüler/innen</label>
+          <input v-model="folderPrefixPupil" placeholder="prefix_">
         </li>
         <li>
-          <label>apiKey:</label>
+          <label>API URL</label>
+          <input v-model="apiUrl" placeholder="https://www.....de/rest.php/vplan/updater">
+        </li>
+        <li>
+          <label>API Key</label>
           <input v-model="apiKey">
-        </li>
-        <li>
-          <button @click="handlerSave">Speichern</button>
         </li>
       </ul>
     </div>
-
+    <footer>
+    </footer>
   </div>
+
+
+
+
 </template>
 
-<style scoped>
+<style>
+
+@import './assets/style/grid.css';
+@import './assets/style/style.css';
+@import './assets/style/si-components.css';
+
+footer {
+  padding-right: 0.6rem;
+  padding-left: 0.6rem;
+  padding-top: 0.2rem;
+  text-align: right;
+  font-size: 80%;
+  background: #222;
+  color: #ccc;
+  border-top: 1px solid #d2d6de;
+}
+.container {
+  width: 100%;
+  height: 100%;
+  display: grid;
+  grid-template-rows: 3rem calc(100vh - 4.4rem) 1.4rem;
+
+}
+
+.container .header {
+  display: flex;
+  padding-right: 0.6rem;
+  padding-left: 0.6rem;
+  background-color: #738b96;
+  box-shadow: rgba(0, 0, 0, 0.1) 0px 4px 6px -1px, rgba(0, 0, 0, 0.06) 0px 2px 4px -1px;
+}
+.container .main {
+  display: grid;
+  justify-items:center;
+  align-items:center;
+  padding: 1rem;
+  overflow: auto;
+}
+.mainMain {
+  text-align: center;
+  padding-top: 1rem;
+  font-size: 90%;
+}
+.container-home .header {
+  justify-content: space-between;
+}
+
+
+.logo {
+  background-image: url('./assets/style/logo.png');
+  background-position: left center;
+  background-size: auto 100%;
+  background-repeat: no-repeat;
+  height: 95%;
+  width: 10rem;
+}
+
+.power {
+  cursor: pointer;
+  align-self: center;
+  background-image: url('./assets/style/icons/power-off-solid.svg');
+  background-position: center;
+  background-size: auto 100%;
+  background-repeat: no-repeat;
+  height: 40vw;
+  width: 40vw;
+}
+.power:hover {
+  opacity: 0.8;
+}
+
+.power.active {
+  background-image: url('./assets/style/icons/power-off-solid_green.svg');
+}
+
+.icon-settings {
+  background-image: url('./assets/style/icons/cogs-solid.svg');
+  background-position: center;
+  background-size: auto 45%;
+  background-repeat: no-repeat;
+  opacity: 0.6;
+}
+
+.icon-back {
+  background-image: url('./assets/style/icons/arrow-left-solid.svg');
+  background-position: center;
+  background-size: auto 50%;
+  background-repeat: no-repeat;
+}
+
+.icon-save {
+  background-image: url('./assets/style/icons/check-solid.svg');
+  background-position: center;
+  background-size: auto 50%;
+  background-repeat: no-repeat;
+}
+
+
+
+ul {
+  width: 100%;
+}
+
+ul li {
+  display: flex;
+  flex-direction: column;
+  padding-top:0.6rem;
+  padding-bottom:0.3rem;
+}
+
+ul li label {
+  padding-bottom:0.2rem;
+
+}
+
 
 </style>

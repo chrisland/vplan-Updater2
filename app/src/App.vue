@@ -184,7 +184,7 @@ export default {
       store.save();
 
       this.handlerPage();
-      this.handlerPower();
+      //this.handlerPower();
     },
 
     handlerPower() {
@@ -230,7 +230,7 @@ export default {
     </div>
     <footer>
       <div v-if="intervalToggle > 1"><b>Status:</b> ({{intervalToggle}}) Daten werden übertragen...</div>
-      <div v-if="power">Synchronisierung alle {{intervalMin}} Minuten</div>
+      <div v-else-if="power">Synchronisierung alle {{intervalMin}} Minuten</div>
       <div v-else>Synchronisierung: Aus</div>
     </footer>
   </div>

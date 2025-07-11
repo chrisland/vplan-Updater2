@@ -65,7 +65,7 @@ export default {
 
     },
     getFolderNames(name) {
-      return [this.folderPrefixTeacher + 'heute', this.folderPrefixTeacher + 'morgen', this.folderPrefixPupil + 'heute', this.folderPrefixPupil + 'morgen'];
+      return [this.folderPrefixTeacher + 'Heute', this.folderPrefixTeacher + 'Morgen', this.folderPrefixPupil + 'Heute', this.folderPrefixPupil + 'Morgen',this.folderPrefixTeacher + 'heute', this.folderPrefixTeacher + 'morgen', this.folderPrefixPupil + 'heute', this.folderPrefixPupil + 'morgen'];
     },
     async watchFolder() {
 
@@ -73,6 +73,8 @@ export default {
         if (this.folder && this.apiUrl && this.apiKey && this.intervalTime) {
           console.log(this.intervalTime)
           this.interval = setInterval(this.handlerInterval, this.intervalTime);
+          console.log('Interval:',this.interval);
+          
         } else {
           this.handlerPage('settings');
         }
@@ -87,16 +89,16 @@ export default {
         return false;
       }
       let type = '';
-      if (folder == this.folderPrefixTeacher + 'heute') {
+      if (folder == this.folderPrefixTeacher + 'heute' || folder == this.folderPrefixTeacher + 'Heute') {
         type = 'lehrerheute';
       }
-      if (folder == this.folderPrefixTeacher + 'morgen') {
+      if (folder == this.folderPrefixTeacher + 'morgen' || folder == this.folderPrefixTeacher + 'Morgen') {
         type = 'lehrermorgen';
       }
-      if (folder == this.folderPrefixPupil + 'heute') {
+      if (folder == this.folderPrefixPupil + 'heute' || folder == this.folderPrefixPupil + 'Heute') {
         type = 'schuelerheute';
       }
-      if (folder == this.folderPrefixPupil + 'morgen') {
+      if (folder == this.folderPrefixPupil + 'morgen' || folder == this.folderPrefixPupil + 'Morgen') {
         type = 'schuelermorgen';
       }
 
@@ -149,15 +151,23 @@ export default {
     },
     handlerInterval() {
 
+      console.log('handlerInterval');  
       if (this.power) {
+
+        console.log('power on');
 
         readDir(this.folder, {baseDir: BaseDirectory.Home}).then((folders) => {
           folders.forEach((folder) => {
+            console.log('found folder:', folder.name);
             if (folder.isDirectory) {
+              console.log('found folder to check:', folder.name,'in', this.getFolderNames());
+              
               if (this.getFolderNames().includes(folder.name)) {
                 readDir(this.folder + '/' + folder.name, {baseDir: BaseDirectory.Home}).then((files) => {
+                  console.log('found files in folder:', folder.name, files);
                   files.forEach(async (file) => {
                     if (folder.name && file.name && file.isFile) {
+                      console.log('found file to upload:', folder.name, file.name);
                       this.sendData(folder.name, file.name );
                     }
                   })
@@ -166,6 +176,8 @@ export default {
             }
           })
         });
+      } else {
+        console.log('power off');
       }
 
     },
@@ -216,6 +228,7 @@ export default {
 <template>
 
 
+<div>
   <div class="container container-home" v-if="page == 'home'">
     <div class="header">
       <div class="logo"></div>
@@ -274,7 +287,7 @@ export default {
   </div>
 
 
-
+</div>
 
 </template>
 

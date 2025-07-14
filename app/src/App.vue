@@ -27,12 +27,21 @@ export default {
       folderPrefixPupil: "",
       apiUrl: "",
       apiKey: "",
-      power: false
+      power: false,
+      konsole: []
     };
   },
   created() {
     this.load();
 
+  },
+  computed: {
+    getKonsole() {
+      if (this.konsole.length > 100) {
+        this.konsole = this.konsole.slice(this.konsole.length - 100, this.konsole.length);
+      }
+      return this.konsole.join('<br>');
+    }
   },
   methods: {
 
@@ -70,13 +79,19 @@ export default {
     async watchFolder() {
 
       if (this.power) {
+        this.konsole.push(' Synchronisierung gestartet...');
         if (this.folder && this.apiUrl && this.apiKey && this.intervalTime) {
           console.log(this.intervalTime)
           this.interval = setInterval(this.handlerInterval, this.intervalTime);
           console.log('Interval:',this.interval);
-          
+          this.konsole.push('Überwache Ordner: <i>' + this.folder + '</i> alle ' + this.intervalMin + ' Minuten');
         } else {
           this.handlerPage('settings');
+        }
+      } else {
+        this.konsole.push('Synchronisierung ausgeschaltet');
+        if (this.interval) {
+          clearInterval(this.interval);
         }
       }
 
@@ -103,29 +118,43 @@ export default {
       }
 
       if (type) {
-        //console.log('sendData:', filepath)
+        
+        console.log('sendData:', filepath)
         this.intervalToggle++;
 
+        
         const res = await upload( // get on server with php://input
             this.apiUrl + '/' + type + '/' + file,
             filepath,
-            ({progress, total}) => {
+            ({progress, total, e}) => {
               console.log('upload:', `Uploaded ${progress} of ${total} bytes`)
+              //this.konsole.push('Upload: ' + file + ' (' + Math.round((progress / total) * 100) + '%)');
             }, // a callback that will be called with the upload progress
             {
               'Content-Type': 'text/plain',
               "auth-app": this.apiKey,
               'auth-session': "false"
             } // optional headers to send with the request
-        );
+        ).catch((error) => {
+          console.log('---+++++Upload Error:', error);
+          this.konsole.push('<span style="color:red">Upload Error:</span><i>' + filepath +'</i>');
+          this.konsole.push('<i style="color:red">Error Code: ' + error+'</i>' );
+          this.intervalToggle--;
 
-        //console.log('upload:', res)
-
+        });
+        console.log('-----   upload:', res)
+        //console.log(res)
         if (res) {
+
           if (this.intervalToggle > 0) {
             this.intervalToggle--;
             this.lastUpload = this.getCurrentTimeInGermanFormat();
             store.set('lastUpload', this.lastUpload);
+            this.konsole.push('Upload beendet: <i>' + filepath+'</i>');
+            if (this.intervalToggle == 0) {
+              this.konsole.push('<span style="color:green">Alle Daten übertragen.</span>');
+
+            }
           }
         }
       }
@@ -156,6 +185,7 @@ export default {
 
         console.log('power on');
 
+        this.konsole.push(this.getCurrentTimeInGermanFormat()+' Ordner scannen... ');
         readDir(this.folder, {baseDir: BaseDirectory.Home}).then((folders) => {
           folders.forEach((folder) => {
             console.log('found folder:', folder.name);
@@ -163,10 +193,14 @@ export default {
               console.log('found folder to check:', folder.name,'in', this.getFolderNames());
               
               if (this.getFolderNames().includes(folder.name)) {
+                this.konsole.push('Ordner gefunden: <i>' + folder.name+'</i>');
+
                 readDir(this.folder + '/' + folder.name, {baseDir: BaseDirectory.Home}).then((files) => {
                   console.log('found files in folder:', folder.name, files);
                   files.forEach(async (file) => {
                     if (folder.name && file.name && file.isFile) {
+                      this.konsole.push('Datei gefunden: ' + file.name +' in <i>'+ folder.name+'</i>');
+
                       console.log('found file to upload:', folder.name, file.name);
                       this.sendData(folder.name, file.name );
                     }
@@ -239,6 +273,10 @@ export default {
         <div class="power" :class="{'active' : this.power == true}" @click="handlerPower"></div>
         <div v-if="!this.power" class="mainMain"><b>Aus</b></div>
         <div v-else-if="lastUpload" class="mainMain">Letzter Upload:<br>{{lastUpload}}</div>
+      </div>
+      <div class="console">
+        <p><b>Konsole:</b></p>
+        <div v-html="getKonsole"></div>
       </div>
     </div>
     <footer>
@@ -334,6 +372,13 @@ footer {
   padding-top: 1rem;
   font-size: 90%;
 }
+
+.console {
+  width: 100%;
+  font-size: 90%;
+}
+
+
 .container-home .header {
   justify-content: space-between;
 }
@@ -355,8 +400,8 @@ footer {
   background-position: center;
   background-size: auto 100%;
   background-repeat: no-repeat;
-  height: 40vw;
-  width: 40vw;
+  height: 30vw;
+  width: 30vw;
 }
 .power:hover {
   opacity: 0.8;

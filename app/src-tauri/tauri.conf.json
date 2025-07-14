@@ -18,7 +18,7 @@
     "resources": []
   },
   "productName": "V-Plan Updater",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "identifier": "de.schuleintern.vplanupdater",
   "app": {
     "security": {

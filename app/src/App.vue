@@ -247,6 +247,10 @@ export default {
 
     },
 
+    handlerSyncNow() {
+      this.handlerInterval();
+    },
+
     handlerPage(page) {
       if (!page) {
         page = 'home';
@@ -274,6 +278,7 @@ export default {
         <div v-if="!this.power" class="mainMain"><b>Aus</b></div>
         <div v-else-if="lastUpload" class="mainMain">Letzter Upload:<br>{{lastUpload}}</div>
       </div>
+      <div @click="handlerSyncNow" class="si-btn si-btn-small si-btn-light">Jetzt Sync starten...</div>
       <div class="console">
         <p><b>Konsole:</b></p>
         <div v-html="getKonsole"></div>

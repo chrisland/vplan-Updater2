@@ -270,19 +270,20 @@ export default {
   <div class="container container-home" v-if="page == 'home'">
     <div class="header">
       <div class="logo"></div>
-      <button class="si-btn si-btn-icon si-btn-border icon-settings" @click="handlerPage('settings')"></button>
+    </div>
+    <div class="nav">
+        <button class="si-btn si-btn-icon si-btn-border icon-console" @click="handlerPage('console')"></button>
+        <button class="si-btn si-btn-icon si-btn-border icon-settings" @click="handlerPage('settings')"></button>
     </div>
     <div class="main">
+      
       <div class="">
         <div class="power" :class="{'active' : this.power == true}" @click="handlerPower"></div>
         <div v-if="!this.power" class="mainMain"><b>Aus</b></div>
         <div v-else-if="lastUpload" class="mainMain">Letzter Upload:<br>{{lastUpload}}</div>
       </div>
-      <div @click="handlerSyncNow" class="si-btn si-btn-small si-btn-light">Jetzt Sync starten...</div>
-      <div class="console">
-        <p><b>Konsole:</b></p>
-        <div v-html="getKonsole"></div>
-      </div>
+      <div @click="handlerSyncNow" class="si-btn si-btn-small si-btn-light">Sync ausführen</div>
+      
     </div>
     <footer>
       <div v-if="intervalToggle > 1"><b>Status:</b> ({{intervalToggle}}) Daten werden übertragen...</div>
@@ -291,11 +292,25 @@ export default {
     </footer>
   </div>
 
+  <div class="container container-console" v-if="page == 'console'">
+    <div class="header">
+      <button class="si-btn si-btn-icon si-btn-border icon-back" @click="handlerPage('home')"></button>
+    </div>
+    <div class="nav"></div>
+    <div class="main">
+      <div class="console">
+        <p><b>Konsole:</b></p>
+        <div v-html="getKonsole"></div>
+      </div>
+    </div>
+  </div>
+
   <div class="container container-settings" v-if="page == 'settings'">
     <div class="header">
       <button class="si-btn si-btn-icon si-btn-border icon-back" @click="handlerPage('home')"></button>
       <button class="si-btn si-btn-icon si-btn-green margin-l-s icon-save" @click="handlerSave"></button>
     </div>
+    <div class="nav"></div>
     <div class="main">
       <ul class="noListStyle">
         <li>
@@ -354,7 +369,7 @@ footer {
   width: 100%;
   height: 100%;
   display: grid;
-  grid-template-rows: 3rem calc(100vh - 4.4rem) 1.4rem;
+  grid-template-rows: 3rem 2rem calc(100vh - 6.4rem) 1.4rem;
 
 }
 
@@ -364,6 +379,24 @@ footer {
   padding-left: 0.6rem;
   background-color: #738b96;
   box-shadow: rgba(0, 0, 0, 0.1) 0px 4px 6px -1px, rgba(0, 0, 0, 0.06) 0px 2px 4px -1px;
+}
+.container .nav {
+  background-color: #95a9b3;
+  box-shadow: rgba(0, 0, 0, 0.1) 0px 4px 6px -1px, rgba(0, 0, 0, 0.06) 0px 2px 4px -1px;
+  display: flex;
+  justify-content: flex-end;
+  align-items:center;
+  padding-right: 0.6rem;
+  padding-left: 0.6rem;
+  overflow: auto;
+}
+.container .nav button {
+  border: none;
+  border-radius: 0;
+}
+.container .nav button:hover {
+    background-color: #81929a;
+
 }
 .container .main {
   display: grid;
@@ -380,7 +413,10 @@ footer {
 
 .console {
   width: 100%;
+  height: 100%;
   font-size: 90%;
+  display: flex;
+  flex-direction: column;
 }
 
 
@@ -418,6 +454,14 @@ footer {
 
 .icon-settings {
   background-image: url('./assets/style/icons/cogs-solid.svg');
+  background-position: center;
+  background-size: auto 45%;
+  background-repeat: no-repeat;
+  opacity: 0.6;
+}
+
+.icon-console {
+  background-image: url('./assets/style/icons/console-solid.svg');
   background-position: center;
   background-size: auto 45%;
   background-repeat: no-repeat;

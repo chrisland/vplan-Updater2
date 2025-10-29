@@ -1,12 +1,9 @@
 <script>
 
 
-//import Greet from "./components/Greet.vue";
 import {Store} from '@tauri-apps/plugin-store';
 import {BaseDirectory, readDir} from '@tauri-apps/plugin-fs';
 import {upload} from '@tauri-apps/plugin-upload';
-//import { fetch } from '@tauri-apps/plugin-http';
-//import { resolve, resourceDir, basename } from '@tauri-apps/api/path';
 import {open} from '@tauri-apps/plugin-dialog';
 
 const store = new Store('store.bin');
@@ -23,8 +20,6 @@ export default {
 
       intervalMin: '',
       folder: "",
-      folderPrefixTeacher: "",
-      folderPrefixPupil: "",
       apiUrl: "",
       apiKey: "",
       power: false,
@@ -49,8 +44,6 @@ export default {
 
       this.folder = await store.get('folder');
       this.power = await store.get('power');
-      this.folderPrefixTeacher = await store.get('folderPrefixTeacher');
-      this.folderPrefixPupil = await store.get('folderPrefixPupil');
       this.apiUrl = await store.get('apiUrl');
       this.apiKey = await store.get('apiKey');
       this.intervalMin = await store.get('intervalMin');
@@ -73,9 +66,6 @@ export default {
       }
 
     },
-    getFolderNames(name) {
-      return [this.folderPrefixTeacher + 'Heute', this.folderPrefixTeacher + 'Morgen', this.folderPrefixPupil + 'Heute', this.folderPrefixPupil + 'Morgen',this.folderPrefixTeacher + 'heute', this.folderPrefixTeacher + 'morgen', this.folderPrefixPupil + 'heute', this.folderPrefixPupil + 'morgen'];
-    },
     async watchFolder() {
 
       if (this.power) {
@@ -97,67 +87,72 @@ export default {
 
     },
 
-    async sendData(folder, file) {
+    async sendData( file) {
 
-      const filepath = this.folder + '/' + folder + '/' + file;
+      const filepath = this.folder + '/' + file;
       if (!filepath) {
         return false;
       }
-      let type = '';
-      if (folder == this.folderPrefixTeacher + 'heute' || folder == this.folderPrefixTeacher + 'Heute') {
-        type = 'lehrerheute';
-      }
-      if (folder == this.folderPrefixTeacher + 'morgen' || folder == this.folderPrefixTeacher + 'Morgen') {
-        type = 'lehrermorgen';
-      }
-      if (folder == this.folderPrefixPupil + 'heute' || folder == this.folderPrefixPupil + 'Heute') {
-        type = 'schuelerheute';
-      }
-      if (folder == this.folderPrefixPupil + 'morgen' || folder == this.folderPrefixPupil + 'Morgen') {
-        type = 'schuelermorgen';
-      }
 
-      if (type) {
-        
-        console.log('sendData:', filepath)
-        this.intervalToggle++;
+      
+      console.log('sendData:', filepath)
+      this.intervalToggle++;
 
-        
-        const res = await upload( // get on server with php://input
-            this.apiUrl + '/' + type + '/' + file,
-            filepath,
-            ({progress, total, e}) => {
-              console.log('upload:', `Uploaded ${progress} of ${total} bytes`)
-              //this.konsole.push('Upload: ' + file + ' (' + Math.round((progress / total) * 100) + '%)');
-            }, // a callback that will be called with the upload progress
-            {
-              'Content-Type': 'text/plain',
-              "auth-app": this.apiKey,
-              'auth-session': "false"
-            } // optional headers to send with the request
-        ).catch((error) => {
-          console.log('---+++++Upload Error:', error);
-          this.konsole.push('<span style="color:red">Upload Error:</span><i>' + filepath +'</i>');
-          this.konsole.push('<i style="color:red">Error Code: ' + error+'</i>' );
+      //this.konsole.push('Send data....' );
+
+      
+      const res = await upload( // get on server with php://input
+          this.apiUrl + '/' + file,
+          filepath,
+          ({progress, total, e}) => {
+            console.log('upload:', `Uploaded ${progress} of ${total} bytes`)
+            //this.konsole.push('Upload: ' + file + ' (' + Math.round((progress / total) * 100) + '%)');
+          }, // a callback that will be called with the upload progress
+          {
+            'Content-Type': 'text/plain',
+            "auth-app": this.apiKey,
+            'auth-session': "false"
+          } // optional headers to send with the request
+      ).catch((error) => {
+        console.log('---+++++Upload Error:', error);
+        this.konsole.push('<span style="color:red">Upload Error:</span><i>' + filepath +'</i>');
+        this.konsole.push('<i style="color:red">Error Code: ' + error+'</i>' );
+        this.intervalToggle--;
+
+      });
+      console.log('-----   upload:', res)
+      //console.log(res)
+      if (res) {
+
+        if (this.intervalToggle > 0) {
           this.intervalToggle--;
-
-        });
-        console.log('-----   upload:', res)
-        //console.log(res)
-        if (res) {
-
-          if (this.intervalToggle > 0) {
-            this.intervalToggle--;
-            this.lastUpload = this.getCurrentTimeInGermanFormat();
-            store.set('lastUpload', this.lastUpload);
-            this.konsole.push('Upload beendet: <i>' + filepath+'</i>');
-            if (this.intervalToggle == 0) {
-              this.konsole.push('<span style="color:green">Alle Daten übertragen.</span>');
+          this.lastUpload = this.getCurrentTimeInGermanFormat();
+          store.set('lastUpload', this.lastUpload);
+          this.konsole.push('Upload beendet: <i>' + filepath+'</i>');
+          if (this.intervalToggle == 0) {
+            this.konsole.push('<span style="color:green">Alle Daten übertragen.</span>');
+            
+            // Push
+            this.konsole.push('Server verarbeitet Daten...');
+            var xmlHttp = new XMLHttpRequest();
+            xmlHttp.open( "POST", this.apiUrl + '/parseUpload', false ); // false for synchronous request
+            xmlHttp.setRequestHeader("auth-app", this.apiKey);
+            xmlHttp.setRequestHeader("auth-session", false);
+            xmlHttp.send( null );
+            console.log( '--------Server ------', xmlHttp.responseText );
+            let ret = JSON.parse(xmlHttp.responseText);
+            if (ret.error && ret.error != false) {
+              this.konsole.push('<span style="color:red">Fehler bei der Verarbeitung auf dem Server.</span>' );
+            } else {
+              this.konsole.push('<span style="color:green">Daten erfolgreich auf dem Server verarbeitet.</span>' );
+            }
+            //this.konsole.push('Server verarbeitet Daten...' );
+            
 
             }
-          }
         }
       }
+      
 
 
 
@@ -184,9 +179,9 @@ export default {
       if (this.power) {
 
         console.log('power on');
-
         this.konsole.push(this.getCurrentTimeInGermanFormat()+' Ordner scannen... ');
-        readDir(this.folder, {baseDir: BaseDirectory.Home}).then((folders) => {
+        /*readDir(this.folder, {baseDir: BaseDirectory.Home}).then((folders) => {
+          
           folders.forEach((folder) => {
             console.log('found folder:', folder.name);
             if (folder.isDirectory) {
@@ -194,22 +189,22 @@ export default {
               
               if (this.getFolderNames().includes(folder.name)) {
                 this.konsole.push('Ordner gefunden: <i>' + folder.name+'</i>');
-
-                readDir(this.folder + '/' + folder.name, {baseDir: BaseDirectory.Home}).then((files) => {
-                  console.log('found files in folder:', folder.name, files);
+*/
+                readDir(this.folder , {baseDir: BaseDirectory.Home}).then((files) => {
+                  console.log('found files in folder:',  files);
                   files.forEach(async (file) => {
-                    if (folder.name && file.name && file.isFile) {
-                      this.konsole.push('Datei gefunden: ' + file.name +' in <i>'+ folder.name+'</i>');
-
-                      console.log('found file to upload:', folder.name, file.name);
-                      this.sendData(folder.name, file.name );
+                    if (file.name && file.isFile && file.name.indexOf('.htm') > -1 ) {
+                      this.konsole.push('Datei gefunden: ' + file.name);
+                      console.log('found file to upload:', file.name);
+                      this.sendData( file.name );
                     }
                   })
                 });
-              }
+             /* }
             }
           })
-        });
+         
+        }); */
       } else {
         console.log('power off');
       }
@@ -218,8 +213,8 @@ export default {
 
     handlerSave() {
 
-      store.set('folderPrefixTeacher', this.folderPrefixTeacher);
-      store.set('folderPrefixPupil', this.folderPrefixPupil);
+      //store.set('folderPrefixTeacher', this.folderPrefixTeacher);
+      //store.set('folderPrefixPupil', this.folderPrefixPupil);
       store.set('apiUrl', this.apiUrl);
       store.set('apiKey', this.apiKey);
       store.set('intervalMin', this.intervalMin);
@@ -322,6 +317,7 @@ export default {
           <label>Lokaler Ordner</label>
           <input v-model="folder" readonly @click="handlerFolder" class="curser">
         </li>
+        <!--
         <li>
           <label>Ordner Prefix Lehrer/innen</label>
           <input v-model="folderPrefixTeacher" placeholder="prefix_">
@@ -330,6 +326,7 @@ export default {
           <label>Ordner Prefix Schüler/innen</label>
           <input v-model="folderPrefixPupil" placeholder="prefix_">
         </li>
+        -->
         <li>
           <label>API URL</label>
           <input v-model="apiUrl" placeholder="https://www.....de/rest.php/vplan/updater">

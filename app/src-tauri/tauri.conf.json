@@ -17,16 +17,16 @@
     ],
     "resources": []
   },
-  "productName": "V-Plan Updater",
-  "version": "0.0.4",
-  "identifier": "de.schuleintern.vplanupdater",
+  "productName": "V-Plan Updater 2",
+  "version": "2.0.0",
+  "identifier": "de.schuleintern.vplanupdater2",
   "app": {
     "security": {
       "csp": null
     },
     "windows": [
       {
-        "title": "V-Plan Updater - Schule-Intern",
+        "title": "V-Plan Updater 2 - Schule-Intern",
         "width": 240,
         "height": 500
       }

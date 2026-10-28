@@ -17,7 +17,7 @@
     ],
     "resources": []
   },
-  "productName": "V-Plan Updater 2",
+  "productName": "Schule-Intern Vplan Updater 2",
   "version": "2.0.0",
   "identifier": "de.schuleintern.vplanupdater2",
   "app": {
@@ -26,9 +26,11 @@
     },
     "windows": [
       {
-        "title": "V-Plan Updater 2 - Schule-Intern",
-        "width": 240,
-        "height": 500
+        "title": "Schule-Intern Vertretungsplan-Updater 2.x",
+        "width": 1100,
+        "height": 760,
+        "minWidth": 360,
+        "minHeight": 500
       }
     ]
   },

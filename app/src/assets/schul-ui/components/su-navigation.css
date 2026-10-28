@@ -1,0 +1,188 @@
+.su-nav { display: grid; gap: 0.125rem; padding: var(--su-space-3); }
+
+.su-nav__label {
+  padding: var(--su-space-4) var(--su-space-3) var(--su-space-2);
+  color: var(--su-color-muted);
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.su-nav__item {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: var(--su-space-3);
+  min-height: 2.375rem;
+  padding: 0 var(--su-space-3);
+  border-left: 0;
+  color: var(--su-color-text-soft);
+  line-height: 1.25;
+  text-decoration: none;
+  transition: color var(--su-transition-fast), background var(--su-transition-fast), box-shadow var(--su-transition-fast);
+}
+
+.su-nav__item:hover {
+  background: var(--su-color-primary-soft);
+  color: var(--su-color-primary);
+}
+
+.su-nav__item--active,
+.su-nav__item[aria-current="page"] {
+  background: var(--su-color-primary-soft);
+  color: var(--su-color-primary);
+  font-weight: 700;
+  box-shadow: inset 0.25rem 0 0 var(--su-color-primary);
+}
+
+.su-tabs {
+  display: flex;
+  gap: var(--su-space-1);
+  border-bottom: 1px solid var(--su-color-border);
+}
+
+.su-tabs__item {
+  position: relative;
+  overflow: hidden;
+  padding: var(--su-space-3) var(--su-space-4);
+  border: 0;
+  background: transparent;
+  color: var(--su-color-text-soft);
+  line-height: 1.25;
+  font-weight: 650;
+  cursor: pointer;
+  transition: color var(--su-transition-fast);
+}
+
+.su-tabs__item::after {
+  content: "";
+  position: absolute;
+  right: var(--su-space-4);
+  bottom: 0;
+  left: var(--su-space-4);
+  height: 0.125rem;
+  background: var(--su-color-primary);
+  transform: translateX(-115%) scaleX(0.64);
+  transform-origin: left;
+  transition: transform var(--su-transition);
+}
+
+.su-tabs__item:hover { color: var(--su-color-primary); }
+
+.su-tabs__item--active,
+.su-tabs__item[aria-selected="true"] {
+  color: var(--su-color-text);
+  font-weight: 700;
+}
+
+.su-tabs__item:hover::after,
+.su-tabs__item--active::after,
+.su-tabs__item[aria-selected="true"]::after {
+  transform: translateX(0) scaleX(1);
+}
+
+.su-calendar-navigation {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-start;
+  gap: var(--su-space-2) var(--su-space-3);
+  margin-bottom: var(--su-space-5);
+}
+
+.su-calendar-navigation__buttons,
+.su-calendar-navigation__picker {
+  flex: 0 0 auto;
+}
+
+.su-calendar-navigation__button {
+  box-sizing: border-box;
+  height: var(--su-control-height-lg);
+  min-width: 120px;
+  min-height: var(--su-control-height-lg);
+  white-space: nowrap;
+}
+
+.su-calendar-navigation__button--today {
+  width: auto;
+  min-width: 0;
+}
+
+.su-calendar-navigation__date {
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: var(--su-space-2);
+  margin: 0;
+  padding: 0 2rem;
+  color: var(--su-color-text);
+  font-size: 18px;
+  font-weight: 550;
+  line-height: 1.12;
+  white-space: nowrap;
+}
+
+.su-calendar-navigation__field {
+  box-sizing: border-box;
+  flex: 0 0 170px;
+  width: 170px;
+  height: var(--su-control-height-lg);
+  min-height: var(--su-control-height-lg);
+}
+
+@media (max-width: 900px) {
+  .su-calendar-navigation {
+    align-items: stretch;
+    row-gap: var(--su-space-3);
+  }
+
+  .su-calendar-navigation__picker {
+    flex-basis: 100%;
+    justify-content: flex-start;
+  }
+}
+
+@media (max-width: 720px) {
+  .su-calendar-navigation__date {
+    order: -1;
+    flex: 1 1 100%;
+    justify-content: flex-start;
+    box-sizing: border-box;
+    width: 100%;
+    min-height: var(--su-control-height);
+    padding: 0;
+  }
+
+  .su-calendar-navigation__buttons {
+    flex: 0 0 auto;
+    width: auto;
+  }
+
+  .su-calendar-navigation__picker {
+    flex: 1 1 0;
+    width: auto;
+    min-width: 0;
+  }
+
+  .su-calendar-navigation__button,
+  .su-calendar-navigation__buttons .su-calendar-navigation__button,
+  .su-calendar-navigation__picker .su-calendar-navigation__button {
+    flex: 0 0 var(--su-control-height-lg);
+    justify-content: center;
+    width: var(--su-control-height-lg);
+    min-width: var(--su-control-height-lg);
+    padding: 0;
+    gap: 0;
+  }
+
+  .su-calendar-navigation__label {
+    display: none;
+  }
+
+  .su-calendar-navigation__field {
+    flex: 1 1 auto;
+    width: auto;
+    min-width: 0;
+    padding-inline: var(--su-space-1);
+  }
+}

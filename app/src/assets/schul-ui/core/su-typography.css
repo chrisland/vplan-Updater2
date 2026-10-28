@@ -1,0 +1,63 @@
+/*
+ * Headline-System in Anlehnung an die markante,
+ * freundliche Abschnittshierarchie der Schule-Intern-Webseite.
+ * Styling greift nur mit su-Klassen.
+ */
+.su-eyebrow {
+  margin: 0 0 var(--su-space-2);
+  color: var(--su-color-primary);
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.su-heading {
+  margin: 0;
+  color: var(--su-color-text);
+  font-weight: 550;
+  letter-spacing: -0.045em;
+  line-height: 1;
+}
+
+.su-heading em {
+  font-family: Georgia, serif;
+  font-style: italic;
+  font-weight: 400;
+  letter-spacing: -0.03em;
+}
+
+.su-heading--3 { letter-spacing: -0.025em; }
+
+.su-heading-group {
+  position: relative;
+  padding-top: var(--su-space-3);
+}
+
+.su-heading-group::before {
+  content: "";
+  position: absolute;
+  inset: 0 auto auto 0;
+  width: 3.25rem;
+  height: 0.25rem;
+  background: var(--su-heading-accent, var(--su-color-primary));
+}
+
+.su-heading-group--split {
+  display: grid;
+  grid-template-columns: minmax(0, 1.1fr) minmax(16rem, 0.9fr);
+  gap: var(--su-space-6);
+  align-items: end;
+}
+
+.su-lead {
+  margin: var(--su-space-3) 0 0;
+  color: var(--su-color-text-soft);
+  line-height: 1.65;
+}
+
+.su-text-muted { color: var(--su-color-muted); }
+.su-text-danger { color: var(--su-color-danger); }
+
+@media (max-width: 720px) {
+  .su-heading-group--split { grid-template-columns: 1fr; gap: var(--su-space-3); }
+}

@@ -1,0 +1,56 @@
+/* Neutrale Design-Tokens. Markenfarben werden in su-skins.css gesetzt. */
+:root {
+  --su-font-sans: "Helvetica Neue", Helvetica, Arial, sans-serif;
+
+  --su-color-text: #18212b;
+  --su-color-text-soft: #475467;
+  --su-color-muted: #6b7787;
+  --su-color-canvas: #f9f9f9;
+  --su-color-surface: #ffffff;
+  --su-color-surface-soft: #ecf0f5;
+  --su-color-surface-raised: #ffffff;
+  --su-color-table-stripe: #f2f5f8;
+  --su-color-border: #d2d6de;
+  --su-color-border-strong: #b7c7ce;
+
+  --su-color-success: #00a65a;
+  --su-color-warning: #f39c12;
+  --su-color-highlight: #f39c12;
+  --su-color-highlight-hover: #e08e0b;
+  --su-color-highlight-soft: #fff4df;
+  --su-color-danger: #dd4b39;
+  --su-color-blue: #3c8dbc;
+  --su-color-orange: #f39c12;
+
+  --su-space-1: 0.25rem;
+  --su-space-2: 0.5rem;
+  --su-space-3: 0.75rem;
+  --su-space-4: 1rem;
+  --su-space-5: 1.5rem;
+  --su-space-6: 2rem;
+  --su-space-7: 3rem;
+
+  --su-radius-control: 0.25rem;
+  --su-radius-panel: 0.375rem;
+  --su-radius-round: 999px;
+
+  --su-shadow-menu: 0 16px 36px rgba(0, 0, 0, 0.16);
+  --su-shadow-focus: 0 0 0 3px var(--su-color-focus-ring);
+
+  --su-control-height-sm: 2.25rem;
+  --su-control-height: 2.625rem;
+  --su-control-height-lg: 3rem;
+
+  --su-transition-fast: 180ms ease;
+  --su-transition: 240ms cubic-bezier(0.22, 1, 0.36, 1);
+
+  /* Fallback, falls keine Skin-Klasse gesetzt wurde. */
+  --su-color-primary: #00a65a;
+  --su-color-primary-hover: #018d4e;
+  --su-color-primary-active: #008d4c;
+  --su-color-primary-soft: #edf7f1;
+  --su-color-primary-soft-hover: #deefe5;
+  --su-color-primary-border: #b8dcc6;
+  --su-color-on-primary: #ffffff;
+  --su-color-focus-ring: rgba(0, 166, 90, 0.24);
+}

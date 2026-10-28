@@ -1,0 +1,16 @@
+<script setup>
+defineProps({ model: { type: Object, required: true } });
+defineEmits(['power', 'sync']);
+</script>
+
+<template>
+<div class="su-split-view"><main class="su-split-view__main"><header class="extension-page-header"><div class="extension-title-row"><div><h1 class="su-heading-2">Synchronisierung</h1><p class="extension-muted">Den Vertretungsplan automatisch aktuell halten.</p></div></div></header><div class="extension-container updater-content">
+              <section class="su-panel"><div class="su-panel__body updater-summary">
+                <div class="updater-sync-icon" :class="{'is-active': model.power}"><svg viewBox="0 0 24 24" class="su-icon" aria-hidden="true"><path d="M20 7a9 9 0 0 0-15-1L2 9m0-6v6h6M4 17a9 9 0 0 0 15 1l3-3m0 6v-6h-6"/></svg></div>
+                <div><h2 class="su-heading-3">{{ model.power ? 'Synchronisierung aktiv' : 'Synchronisierung pausiert' }}</h2><p class="extension-muted">{{ model.power ? 'Der lokale Ordner wird regelmäßig geprüft.' : 'Aktiviere die automatische Übertragung mit den Schaltflächen unten.' }}</p></div>
+                <div class="updater-last-upload"><span class="extension-muted">Letzter Upload</span><strong>{{ model.lastUpload || 'Noch kein Upload' }}</strong></div>
+<div class="su-choice-toggle" role="group" aria-label="Automatische Synchronisierung"><button class="su-button su-button--secondary su-choice-toggle__option" :class="{'is-active': model.power}" :aria-pressed="!!model.power" @click="!model.power && $emit('power')">An</button><button class="su-button su-button--secondary su-choice-toggle__option" :class="{'is-active': !model.power}" :aria-pressed="!model.power" @click="model.power && $emit('power')">Aus</button></div>
+              </div></section>
+              <section class="su-panel"><div class="su-panel__body"><h2 class="su-heading-3">Überwachter Ordner</h2><p class="updater-folder">{{ model.folder || 'Noch kein Ordner ausgewählt' }}</p><p class="extension-muted">HTML-Dateien aus diesem Ordner werden an Schule-Intern übertragen.</p><p class="updater-folder extension-muted">{{ model.apiUrl || 'Noch keine API-URL hinterlegt' }}</p></div></section>
+            </div></main><aside class="extension-side-panel updater-side-panel" aria-label="Aktionen und Status"><section class="su-panel"><div class="su-panel__body"><div class="extension-breadcrumbs">Schule-Intern Vertretungsplan-Updater 2.x / Übersicht</div><h2 class="su-heading-3">Status</h2><dl class="updater-status"><dt>Automatik</dt><dd :class="{'updater-success': model.power}">{{ model.power ? 'Aktiv' : 'Ausgeschaltet' }}</dd><dt>Intervall</dt><dd>{{ model.intervalMin ? model.intervalMin + ' Minuten' : 'Nicht eingerichtet' }}</dd><dt>Übertragung</dt><dd>{{ model.intervalToggle > 0 ? model.intervalToggle + ' Datei(en)' : 'Bereit' }}</dd><dt>Letzter Upload</dt><dd>{{ model.lastUpload || 'Noch keiner' }}</dd></dl></div></section><section class="su-panel"><div class="su-panel__body extension-stack-sm"><h2 class="su-heading-3">Aktionen</h2><button class="su-button" :disabled="!model.power || model.intervalToggle > 0" @click="$emit('sync')">Jetzt synchronisieren <svg class="su-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 7a9 9 0 0 0-15-1L2 9m0-6v6h6M4 17a9 9 0 0 0 15 1l3-3m0 6v-6h-6"/></svg></button></div></section></aside></div>
+</template>

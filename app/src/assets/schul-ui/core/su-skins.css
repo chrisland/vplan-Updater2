@@ -1,0 +1,45 @@
+.skin-green .su-theme,
+.skin-green-light .su-theme,
+.skin-green .su-app,
+.skin-green-light .su-app,
+.su-app.skin-green,
+.su-app.skin-green-light,
+.su-skin-green,
+.su-skin-green-light {
+  --su-color-primary: #00a65a;
+  --su-color-primary-hover: #018d4e;
+  --su-color-primary-active: #008d4c;
+  --su-color-primary-alternate: #3c8dbc;
+  --su-color-primary-alternate-hover: #367fa9;
+  --su-color-primary-soft: #edf7f1;
+  --su-color-primary-soft-hover: #deefe5;
+  --su-color-primary-border: #b8dcc6;
+  --su-color-on-primary: #ffffff;
+  --su-color-focus-ring: rgba(0, 166, 90, 0.24);
+
+  --su-heading-accent: #00a65a;
+  --su-heading-accent-soft: #dcefe3;
+}
+
+.skin-blue .su-theme,
+.skin-blue-light .su-theme,
+.skin-blue .su-app,
+.skin-blue-light .su-app,
+.su-app.skin-blue,
+.su-app.skin-blue-light,
+.su-skin-blue,
+.su-skin-blue-light {
+  --su-color-primary: #3c8dbc;
+  --su-color-primary-hover: #367fa9;
+  --su-color-primary-active: #2f6f95;
+  --su-color-primary-alternate: #00a65a;
+  --su-color-primary-alternate-hover: #018d4e;
+  --su-color-primary-soft: #ecf0f5;
+  --su-color-primary-soft-hover: #e2ebf1;
+  --su-color-primary-border: #b7c7ce;
+  --su-color-on-primary: #ffffff;
+  --su-color-focus-ring: rgba(60, 141, 188, 0.24);
+
+  --su-heading-accent: #3c8dbc;
+  --su-heading-accent-soft: #dceef7;
+}

@@ -1,0 +1,504 @@
+.su-theme,
+.su-app {
+  color: var(--su-color-text);
+  background: var(--su-color-canvas);
+  font-family: var(--su-font-sans);
+  line-height: 1.45;
+}
+
+.su-app {
+  display: grid;
+  grid-template-columns: 15.75rem minmax(0, 1fr);
+  min-height: 100vh;
+}
+
+.su-app__sidebar {
+  min-width: 0;
+  border-right: 1px solid var(--su-color-border);
+}
+
+.su-app__workspace {
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  min-width: 0;
+}
+
+.su-app__topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 4rem;
+  padding: 0 var(--su-space-5);
+  border-bottom: 1px solid var(--su-color-border);
+}
+
+.su-app__content {
+  min-width: 0;
+  padding: var(--su-space-5);
+}
+
+.su-split-view {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 340px;
+  column-gap: var(--su-space-3);
+  min-height: 0;
+}
+
+.su-split-view__main {
+  min-width: 0;
+  overflow: auto;
+  box-sizing: border-box;
+  padding: var(--su-space-5);
+}
+
+.su-split-view__aside {
+  overflow: auto;
+  border-left: 1px solid var(--su-color-border);
+  background: var(--su-color-surface-soft);
+}
+
+@media (max-width: 960px) {
+  .su-app { grid-template-columns: 4.25rem minmax(0, 1fr); }
+  .su-split-view { grid-template-columns: 1fr; }
+  .su-split-view__aside { border-top: 1px solid var(--su-color-border); border-left: 0; }
+}
+
+/* Gemeinsamer Extension-Rahmen gemaess Studio-UI-README */
+.extension-ui {
+  position: relative;
+  min-height: calc(100vh - 180px);
+  border: 1px solid var(--su-color-border);
+  background: var(--su-color-canvas);
+  color: var(--su-color-text);
+}
+
+.extension-workspace {
+  min-height: calc(100vh - 180px);
+  overflow: hidden;
+}
+
+.extension-ui .su-split-view__main,
+.extension-side-panel {
+  min-width: 0;
+}
+
+.extension-side-panel {
+  display: grid;
+  align-content: start;
+  gap: var(--su-space-3);
+}
+
+.extension-page-header {
+  padding: 0 0 var(--su-space-4);
+  border-bottom: 1px solid var(--su-color-border);
+}
+
+.extension-title-row,
+.extension-section-title {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--su-space-4);
+}
+
+.extension-section-title {
+  align-items: center;
+  margin-bottom: var(--su-space-3);
+}
+
+.extension-section-title h2,
+.extension-section-title h3 {
+  margin: 0;
+}
+
+.extension-title-main {
+  display: flex;
+  align-items: center;
+  gap: var(--su-space-3);
+  min-width: 0;
+}
+
+.extension-title-main > div { min-width: 0; }
+
+.extension-ui .su-heading-2,
+.extension-ui .su-heading-3 {
+  margin: 0;
+  color: var(--su-color-text);
+  font-weight: 550;
+  line-height: 1.12;
+  letter-spacing: 0;
+}
+
+.extension-ui .su-heading-2 { font-size: 24px; }
+.extension-ui .su-heading-3 { font-size: 18px; }
+
+.extension-muted {
+  margin: 4px 0 0;
+  color: var(--su-color-muted);
+  font-size: 14px;
+}
+
+.extension-container { padding: var(--su-space-5) 0 0; }
+
+.extension-stack,
+.extension-stack-sm,
+.extension-grid-2 {
+  display: grid;
+  gap: var(--su-space-3);
+}
+
+.extension-stack-sm { gap: var(--su-space-2); }
+
+.extension-grid-2 {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  column-gap: var(--su-space-5);
+  align-items: start;
+}
+
+.extension-ui .su-field {
+  display: grid;
+  gap: var(--su-space-2);
+}
+
+.extension-ui .su-field.required .su-label,
+.extension-ui .required .su-label {
+  color: var(--su-color-danger);
+}
+
+.extension-field-error {
+  margin: 0;
+  color: var(--su-color-danger);
+  font-size: 13px;
+}
+
+.extension-breadcrumbs {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.35rem;
+  margin-bottom: var(--su-space-3);
+  color: var(--su-color-muted);
+  font-size: 12px;
+}
+
+.extension-breadcrumbs__item {
+  appearance: none;
+  border: 0;
+  background: transparent;
+  color: var(--su-color-primary);
+  font: inherit;
+  padding: 0;
+  cursor: pointer;
+}
+
+.extension-breadcrumbs__item.is-current {
+  color: var(--su-color-muted);
+  cursor: default;
+}
+
+.extension-breadcrumbs__sep { color: var(--su-color-border-strong); }
+.extension-table-row { cursor: pointer; }
+.extension-table-empty { padding: 40px 24px; color: var(--su-color-muted); text-align: center; }
+.extension-old-value { color: var(--su-color-muted); text-decoration: line-through; }
+.extension-pre-line { white-space: pre-line; }
+
+@media (max-width: 960px) {
+  .extension-grid-2 { grid-template-columns: 1fr; }
+  .extension-title-row { display: grid; }
+}
+
+/* Krankmeldung: gemeinsam genutztes View-Layout */
+.krankmeldung-ui {
+  position: relative;
+  min-height: calc(100vh - 180px);
+  border: 1px solid var(--su-color-border);
+  background: var(--su-color-canvas);
+  color: var(--su-color-text);
+}
+
+.krankmeldung-workspace {
+  min-height: calc(100vh - 180px);
+  overflow: hidden;
+}
+
+.krankmeldung-ui .su-split-view__main,
+.krankmeldung-side-panel {
+  min-width: 0;
+}
+
+.krankmeldung-ui .su-split-view__main {
+  padding: var(--su-space-5);
+}
+
+.krankmeldung-side-panel {
+  display: grid;
+  align-content: start;
+  gap: var(--su-space-3);
+}
+
+.krankmeldung-page-header {
+  padding: 0 0 var(--su-space-4);
+  border-bottom: 1px solid var(--su-color-border);
+}
+
+.krankmeldung-title-row,
+.krankmeldung-section-title {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--su-space-4);
+}
+
+.krankmeldung-section-title {
+  align-items: center;
+  margin-bottom: var(--su-space-3);
+}
+
+.krankmeldung-title-main {
+  display: flex;
+  align-items: center;
+  gap: var(--su-space-3);
+  min-width: 0;
+}
+
+.krankmeldung-title-main > div {
+  min-width: 0;
+}
+
+.krankmeldung-ui .su-heading-2,
+.krankmeldung-ui .su-heading-3 {
+  margin: 0;
+  color: var(--su-color-text);
+  font-weight: 550;
+  line-height: 1.12;
+  letter-spacing: 0;
+}
+
+.krankmeldung-ui .su-heading-2 {
+  font-size: 24px;
+}
+
+.krankmeldung-ui .su-heading-3 {
+  font-size: 18px;
+}
+
+.krankmeldung-container {
+  padding: var(--su-space-5) 0 0;
+}
+
+.krankmeldung-muted,
+.krankmeldung-help {
+  color: var(--su-color-muted);
+}
+
+.krankmeldung-muted {
+  margin: 4px 0 0;
+  font-size: 14px;
+}
+
+.krankmeldung-stack,
+.krankmeldung-stack-sm,
+.krankmeldung-grid-2 {
+  display: grid;
+  gap: var(--su-space-3);
+}
+
+.krankmeldung-stack-sm {
+  gap: var(--su-space-2);
+}
+
+.krankmeldung-grid-2 {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.krankmeldung-ui .su-field {
+  display: grid;
+  gap: var(--su-space-2);
+}
+
+.krankmeldung-field-error {
+  margin: 4px 0 0;
+  color: var(--su-color-danger);
+  font-size: 13px;
+}
+
+.krankmeldung-table-row {
+  cursor: pointer;
+}
+
+.krankmeldung-table-empty {
+  padding: 40px 24px;
+  color: var(--su-color-muted);
+  text-align: center;
+}
+
+.krankmeldung-status-text {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--su-space-2);
+  color: var(--su-color-warning);
+  white-space: nowrap;
+}
+
+.krankmeldung-status-text.is-approved {
+  color: var(--su-color-success);
+}
+
+.krankmeldung-status-text.is-rejected {
+  color: var(--su-color-danger);
+}
+
+.krankmeldung-date-current {
+  color: var(--su-color-warning);
+  font-weight: 600;
+}
+
+.krankmeldung-note-preview {
+  display: -webkit-box;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+  white-space: normal;
+}
+
+.krankmeldung-key-value {
+  display: grid;
+  grid-template-columns: 100px minmax(0, 1fr);
+  gap: var(--su-space-2) var(--su-space-3);
+  font-size: 13px;
+}
+
+.krankmeldung-key-value > :nth-child(odd) {
+  color: var(--su-color-muted);
+}
+
+.krankmeldung-key-value > :nth-child(even) {
+  min-width: 0;
+  overflow-wrap: anywhere;
+  font-weight: 600;
+}
+
+.krankmeldung-breadcrumbs {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.35rem;
+  margin-bottom: var(--su-space-3);
+  color: var(--su-color-muted);
+  font-size: 12px;
+}
+
+.krankmeldung-breadcrumbs__item {
+  appearance: none;
+  border: 0;
+  padding: 0;
+  background: transparent;
+  color: var(--su-color-primary);
+  font: inherit;
+  cursor: pointer;
+}
+
+.krankmeldung-breadcrumbs__item.is-current {
+  color: var(--su-color-muted);
+  cursor: default;
+}
+
+.krankmeldung-breadcrumbs__sep {
+  color: var(--su-color-border-strong);
+}
+
+.krankmeldung-form-grid,
+.krankmeldung-form-column {
+  align-content: start;
+}
+
+.krankmeldung-form .su-label {
+  color: var(--su-color-text);
+}
+
+.krankmeldung-detail-field {
+  display: grid;
+  gap: var(--su-space-2);
+  padding-bottom: var(--su-space-3);
+  border-bottom: 1px solid var(--su-color-border);
+}
+
+.krankmeldung-detail-label {
+  color: var(--su-color-muted);
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.krankmeldung-detail-value {
+  color: var(--su-color-text);
+  line-height: 1.55;
+  white-space: pre-wrap;
+}
+
+.krankmeldung-calendar-nav {
+  display: grid;
+  grid-template-columns: auto auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: var(--su-space-2);
+}
+
+.krankmeldung-calendar-date {
+  min-width: 0;
+  color: var(--su-color-text);
+  font-size: 16px;
+  font-weight: 650;
+  text-align: center;
+}
+
+.krankmeldung-schedule,
+.krankmeldung-exams {
+  display: grid;
+  gap: var(--su-space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.krankmeldung-schedule__row {
+  display: grid;
+  grid-template-columns: 2rem minmax(0, 1fr);
+  gap: var(--su-space-2);
+}
+
+.krankmeldung-char-count {
+  justify-self: end;
+  color: var(--su-color-muted);
+  font-size: 12px;
+}
+
+@media (max-width: 960px) {
+  .krankmeldung-title-row {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .krankmeldung-title-row > .su-flex {
+    flex-wrap: wrap;
+    justify-content: flex-end;
+  }
+
+  .krankmeldung-side-panel {
+    border-top: 1px solid var(--su-color-border);
+  }
+
+  .krankmeldung-grid-2 {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .krankmeldung-calendar-nav {
+    grid-template-columns: repeat(3, auto);
+  }
+
+  .krankmeldung-calendar-date {
+    grid-column: 1 / -1;
+    grid-row: 1;
+    text-align: left;
+  }
+}

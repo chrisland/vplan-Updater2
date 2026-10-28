@@ -1,0 +1,21 @@
+/*
+ * Schule-Intern UI
+ * Zentraler Einstiegspunkt
+ */
+@import url("./core/su-tokens.css");
+@import url("./core/su-skins.css");
+@import url("./core/su-layout.css");
+@import url("./core/su-typography.css");
+
+@import url("./components/su-buttons.css");
+@import url("./components/su-forms.css");
+@import url("./components/su-tables.css");
+@import url("./components/su-navigation.css");
+@import url("./components/su-feedback.css");
+@import url("./components/su-panels.css");
+@import url("./components/su-sidebar-menu.css");
+@import url("./components/su-modals.css");
+@import url("./components/su-users.css");
+@import url("./components/su-legal.css");
+
+@import url("./utilities/su-utilities.css");

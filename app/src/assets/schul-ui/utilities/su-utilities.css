@@ -1,0 +1,39 @@
+.su-flex { display: flex !important; }
+.su-grid { display: grid !important; }
+.su-items-center { align-items: center !important; }
+.su-justify-between { justify-content: space-between !important; }
+.su-wrap { flex-wrap: wrap !important; }
+.su-gap-1 { gap: var(--su-space-1) !important; }
+.su-gap-2 { gap: var(--su-space-2) !important; }
+.su-gap-3 { gap: var(--su-space-3) !important; }
+.su-gap-4 { gap: var(--su-space-4) !important; }
+.su-gap-5 { gap: var(--su-space-5) !important; }
+.su-mt-3 { margin-top: var(--su-space-3) !important; }
+.su-mt-4 { margin-top: var(--su-space-4) !important; }
+.su-mt-5 { margin-top: var(--su-space-5) !important; }
+.su-mb-3 { margin-bottom: var(--su-space-3) !important; }
+.su-mb-4 { margin-bottom: var(--su-space-4) !important; }
+.su-w-full { width: 100% !important; }
+.su-sr-only {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  padding: 0 !important;
+  margin: -1px !important;
+  overflow: hidden !important;
+  clip: rect(0, 0, 0, 0) !important;
+  white-space: nowrap !important;
+  border: 0 !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .su-button,
+  .su-input,
+  .su-select,
+  .su-textarea,
+  .su-switch,
+  .su-nav__item,
+  .su-table__row {
+    transition: none !important;
+  }
+}

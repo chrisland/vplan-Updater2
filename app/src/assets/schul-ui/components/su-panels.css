@@ -1,0 +1,137 @@
+.su-panel {
+  border: 1px solid var(--su-color-border);
+  border-radius: var(--su-radius-panel);
+  background: var(--su-color-surface);
+  box-shadow: 0 1px 1px rgba(0, 0, 0, 0.08);
+}
+
+.su-panel--spaced {
+  margin-top: var(--su-space-5);
+}
+
+.su-panel--notice {
+  border-color: var(--su-color-primary-border);
+  background: var(--su-color-primary-soft);
+  color: var(--su-color-text);
+}
+
+.su-panel--notice-compact {
+  width: fit-content;
+  max-width: 100%;
+}
+
+.su-notice {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: start;
+  gap: var(--su-space-4);
+  color: var(--su-color-text);
+  font-size: 15px;
+}
+
+.su-notice__icon {
+  margin-top: 1px;
+  color: var(--su-color-primary);
+  font-size: 24.2px;
+  line-height: 1.2;
+}
+
+.su-notice__content {
+  display: grid;
+  gap: var(--su-space-2);
+  min-width: 0;
+}
+
+.su-notice__text {
+  overflow-wrap: anywhere;
+}
+
+.su-panel__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--su-space-4);
+  padding: var(--su-space-4) var(--su-space-5);
+  border-bottom: 1px solid var(--su-color-border);
+}
+
+.su-panel__body { padding: var(--su-space-5); }
+
+.su-panel__title {
+  margin: 0;
+  font-weight: 500;
+  letter-spacing: -0.025em;
+  line-height: 1.1;
+}
+
+.su-split-view > aside > .su-panel:first-child,
+.su-split-view__aside > .su-panel:first-child {
+  border-top: 0;
+  border-top-left-radius: 0;
+  border-top-right-radius: 0;
+}
+
+.su-key-value,
+.begabung-key-value,
+.books-key-value,
+.schueler-key-value,
+.menu-key-value {
+  display: grid;
+  grid-template-columns: 100px minmax(0, 1fr);
+  gap: var(--su-space-2) var(--su-space-3);
+  font-size: 13px;
+}
+
+.su-key-value > :nth-child(odd),
+.begabung-key-value > :nth-child(odd),
+.books-key-value > :nth-child(odd),
+.schueler-key-value > :nth-child(odd),
+.menu-key-value > :nth-child(odd) {
+  color: var(--su-color-muted);
+}
+
+.su-key-value > :nth-child(even),
+.begabung-key-value > :nth-child(even),
+.books-key-value > :nth-child(even),
+.schueler-key-value > :nth-child(even),
+.menu-key-value > :nth-child(even) {
+  min-width: 0;
+  overflow-wrap: anywhere;
+  font-weight: 600;
+}
+
+.su-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--su-space-3);
+  min-height: 3rem;
+  padding: var(--su-space-2) var(--su-space-4);
+  border: 1px solid var(--su-color-border);
+  background: var(--su-color-surface-soft);
+}
+
+.su-popover {
+  min-width: 14rem;
+  padding: var(--su-space-2);
+  border: 1px solid var(--su-color-border-strong);
+  border-radius: var(--su-radius-control);
+  background: var(--su-color-surface-raised);
+  box-shadow: var(--su-shadow-menu);
+}
+
+.su-popover__item {
+  display: flex;
+  align-items: center;
+  gap: var(--su-space-2);
+  min-height: 2.25rem;
+  padding: 0 var(--su-space-3);
+  color: var(--su-color-text);
+  text-decoration: none;
+}
+
+.su-popover__item:hover {
+  background: var(--su-color-primary-soft);
+  color: var(--su-color-primary);
+}

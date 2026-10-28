@@ -1,0 +1,309 @@
+.su-button {
+  appearance: none;
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  display: inline-flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--su-space-5);
+  box-sizing: border-box;
+  min-height: var(--su-control-height);
+  padding: 8px var(--su-space-5);
+  border: 0;
+  border-radius: var(--su-radius-control);
+  background: var(--su-color-primary);
+  color: var(--su-color-on-primary);
+  font: inherit;
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 1.2;
+  letter-spacing: 0.05rem;
+  text-decoration: none;
+  cursor: pointer;
+  transition:
+    color var(--su-transition-fast),
+    background var(--su-transition-fast),
+    border-color var(--su-transition-fast),
+    box-shadow var(--su-transition-fast);
+}
+
+.su-button::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: linear-gradient(120deg, rgba(255, 255, 255, 0.22), rgba(255, 255, 255, 0) 42%);
+  opacity: 0;
+  transform: translateX(-25%);
+  transition: opacity var(--su-transition-fast), transform var(--su-transition);
+}
+
+.su-button:hover {
+  background: var(--su-color-primary-hover);
+  color: var(--su-color-on-primary);
+}
+
+.su-button:hover::after { opacity: 1; transform: translateX(0); }
+
+.su-button:focus-visible {
+  outline: 0;
+  box-shadow: var(--su-shadow-focus);
+}
+
+.su-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.48;
+}
+
+.su-button--primary {
+  background: var(--su-color-primary);
+  color: var(--su-color-on-primary);
+}
+
+.su-button--primary:hover {
+  background: var(--su-color-primary-hover);
+  color: var(--su-color-on-primary);
+}
+
+.su-button--alternate {
+  background: var(--su-color-primary-alternate, var(--su-color-primary));
+  color: var(--su-color-on-primary);
+}
+
+.su-button--alternate:hover {
+  background: var(--su-color-primary-alternate-hover, var(--su-color-primary-hover));
+  color: var(--su-color-on-primary);
+}
+
+.su-button--secondary {
+  background: #edf1f5;
+  color: var(--su-color-text-soft);
+  border: 1px solid var(--su-color-border);
+}
+
+.su-button--secondary::after {
+  background: linear-gradient(120deg, rgba(255, 255, 255, 0.72), rgba(255, 255, 255, 0) 46%);
+}
+
+.su-button--secondary:hover {
+  background: #e2e8ef;
+  color: var(--su-color-text);
+}
+
+.su-button--back {
+  background: #edf1f5;
+  color: var(--su-color-text-soft);
+  border: 1px solid var(--su-color-border);
+}
+
+.su-button--back::after {
+  background: linear-gradient(120deg, rgba(255, 255, 255, 0.72), rgba(255, 255, 255, 0) 46%);
+}
+
+.su-button--back:hover {
+  background: #e2e8ef;
+  color: var(--su-color-text);
+}
+
+.su-button--quiet {
+  background: transparent;
+  color: var(--su-color-text);
+  border-bottom: 1px solid var(--su-color-warning);
+  padding-inline: 0;
+}
+
+.su-button--danger {
+  background: var(--su-color-danger);
+  color: #fff;
+}
+
+.su-button--danger-hover:hover {
+  background: var(--su-color-danger);
+  color: #fff;
+}
+
+.su-button--primary-switch-hover:hover {
+  background: var(--su-color-primary-alternate, var(--su-color-primary-hover));
+  color: var(--su-color-on-primary);
+}
+
+.su-button--icon {
+  width: var(--su-control-height);
+  padding: 0;
+  justify-content: center;
+  gap: 0;
+}
+
+.su-back-chevron {
+  appearance: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 2rem;
+  width: 2rem;
+  min-height: 5rem;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  color: var(--su-color-muted);
+  cursor: pointer;
+  font-size: 2.15rem;
+  line-height: 1;
+  margin-right: var(--su-space-3);
+  padding: 0;
+  transition: color var(--su-transition-fast);
+}
+
+.su-back-chevron:hover,
+.su-back-chevron:focus-visible {
+  color: var(--su-color-primary);
+  outline: none;
+}
+
+.su-button--danger.su-button--icon {
+  border-radius: var(--su-radius-round);
+}
+
+.su-button--sm { min-height: var(--su-control-height-sm); padding-inline: var(--su-space-4); }
+.su-button--lg { min-height: var(--su-control-height-lg); padding-inline: var(--su-space-5); }
+
+/* Adapter fuer vue-simple-uploader: explizite su-button-Varianten behalten
+   trotz des nachgeladenen Plugin-CSS die zentralen Control-Masse und Farben. */
+.uploader-btn.su-button {
+  display: inline-flex;
+  min-height: var(--su-control-height);
+  padding: 8px var(--su-space-5);
+  border: 0;
+  border-radius: var(--su-radius-control);
+  background: var(--su-color-primary);
+  color: var(--su-color-on-primary);
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 1.2;
+  letter-spacing: 0.05rem;
+}
+
+.uploader-btn.su-button:hover {
+  background: var(--su-color-primary-hover);
+  color: var(--su-color-on-primary);
+}
+
+.uploader-btn.su-button.su-button--secondary,
+.uploader-btn.su-button.su-button--back {
+  border: 1px solid var(--su-color-border);
+  background: #edf1f5;
+  color: var(--su-color-text-soft);
+}
+
+.uploader-btn.su-button.su-button--sm {
+  min-height: var(--su-control-height-sm);
+  padding-inline: var(--su-space-4);
+}
+
+.su-action-stack {
+  display: grid;
+  gap: var(--su-space-2);
+}
+
+.su-button.su-button--circle-sm {
+  width: 2rem;
+  height: 2rem;
+  min-width: 2rem;
+  min-height: 2rem;
+  padding: 0;
+  border-radius: 50%;
+}
+
+.su-button.su-button--circle-sm > i {
+  font-size: 0.82rem;
+}
+
+.su-button-group {
+  display: inline-flex;
+  align-items: stretch;
+  flex-wrap: wrap;
+  max-width: 100%;
+  gap: 0;
+  border: 0;
+  border-bottom: 1px solid var(--su-color-border);
+  border-radius: 0;
+  background: var(--su-color-surface-soft);
+  box-shadow: none;
+}
+
+.su-button-group .su-button-group__item {
+  border-radius: 0;
+  overflow: hidden;
+  background: transparent;
+  color: var(--su-color-muted);
+  box-shadow: none;
+  justify-content: center;
+}
+
+.su-button-group .su-button-group__item::after {
+  display: none;
+}
+
+.su-button-group .su-button-group__item:not(:last-child),
+.su-button-group .su-button-group__item {
+  border-left: 1px solid transparent;
+  border-right: 1px solid transparent;
+}
+
+.su-button-group .su-button-group__item:hover {
+  background: #f0f3f7;
+  color: var(--su-color-text);
+}
+
+.su-button-group .su-button-group__item--active,
+.su-button-group .su-button-group__item[aria-current="page"],
+.su-button-group .su-button-group__item[aria-selected="true"] {
+  background: var(--su-color-surface);
+  color: var(--su-color-text);
+  border-left-color: var(--su-color-border);
+  border-right-color: var(--su-color-border);
+  box-shadow: inset 0 -2px 0 var(--su-color-highlight);
+}
+
+.su-button-group .su-button-group__item--active:hover,
+.su-button-group .su-button-group__item[aria-current="page"]:hover,
+.su-button-group .su-button-group__item[aria-selected="true"]:hover {
+  background: var(--su-color-surface);
+  color: var(--su-color-text);
+  box-shadow: inset 0 -2px 0 var(--su-color-highlight-hover);
+}
+
+.su-button > i,
+.su-button > .fa,
+.su-button > .fas,
+.su-button > .far,
+.su-button > .fab {
+  position: relative;
+  z-index: 2;
+  display: inline-grid;
+  place-items: center;
+  min-width: 1.25em;
+}
+
+.su-button__icon,
+.su-icon {
+  width: 1.125rem;
+  height: 1.125rem;
+  flex: 0 0 auto;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.su-button--blue {
+  background: var(--su-color-blue);
+  color: var(--su-color-on-primary);
+}
+
+.su-button--blue:hover {
+  background: #367fa9;
+  color: var(--su-color-on-primary);
+}

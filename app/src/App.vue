@@ -2,14 +2,21 @@
 
 
 import {Store} from '@tauri-apps/plugin-store';
-import {BaseDirectory, readDir} from '@tauri-apps/plugin-fs';
+import {BaseDirectory, readDir, readFile, writeFile, remove} from '@tauri-apps/plugin-fs';
+import {tempDir, join} from '@tauri-apps/api/path';
+import {appendUpload, decodeHtml} from './lib/upload-history.js';
+import UploadsView from './views/UploadsView.vue';
 import {upload} from '@tauri-apps/plugin-upload';
 import {open} from '@tauri-apps/plugin-dialog';
+
+import OverviewView from './views/OverviewView.vue';
+import ProtocolView from './views/ProtocolView.vue';
+import SettingsView from './views/SettingsView.vue';
 
 const store = new Store('store.bin');
 
 export default {
-  components: {},
+  components: { OverviewView, ProtocolView, SettingsView, UploadsView },
   data() {
     return {
       page: "home",
@@ -23,6 +30,8 @@ export default {
       apiUrl: "",
       apiKey: "",
       power: false,
+      uploadHistory: [],
+      historyWrite: Promise.resolve(),
       konsole: []
     };
   },
@@ -41,7 +50,9 @@ export default {
   methods: {
 
     async load() {
+      await this.historyWrite.catch(() => {});
 
+      this.uploadHistory = (await store.get('uploadHistory') || []).slice(0, 10);
       this.folder = await store.get('folder');
       this.power = await store.get('power');
       this.apiUrl = await store.get('apiUrl');
@@ -98,31 +109,52 @@ export default {
       console.log('sendData:', filepath)
       this.intervalToggle++;
 
-      //this.konsole.push('Send data....' );
-
-      
-      const res = await upload( // get on server with php://input
-          this.apiUrl + '/' + file,
-          filepath,
-          ({progress, total, e}) => {
-            console.log('upload:', `Uploaded ${progress} of ${total} bytes`)
-            //this.konsole.push('Upload: ' + file + ' (' + Math.round((progress / total) * 100) + '%)');
-          }, // a callback that will be called with the upload progress
-          {
-            'Content-Type': 'text/plain',
-            "auth-app": this.apiKey,
-            'auth-session': "false"
-          } // optional headers to send with the request
-      ).catch((error) => {
-        console.log('---+++++Upload Error:', error);
-        this.konsole.push('<span style="color:red">Upload Error:</span><i>' + filepath +'</i>');
-        this.konsole.push('<i style="color:red">Error Code: ' + error+'</i>' );
+      let res;
+      let snapshotPath;
+      let bytes;
+      const destination = this.apiUrl + '/' + file;
+      try {
+        bytes = await readFile(filepath);
+        snapshotPath = await join(await tempDir(), 'vplan-upload-' + crypto.randomUUID() + '.htm');
+        await writeFile(snapshotPath, bytes);
+        // Upload the same immutable snapshot that is retained in the history.
+        res = await upload(destination, snapshotPath, undefined, {
+          'Content-Type': 'text/plain',
+          'auth-app': this.apiKey,
+          'auth-session': 'false'
+        });
+      } catch (error) {
+        console.error('Upload fehlgeschlagen:', error);
+        this.konsole.push('Upload fehlgeschlagen: ' + file);
         this.intervalToggle--;
-
+        return;
+      } finally {
+        if (snapshotPath) {
+          await remove(snapshotPath).catch(error => console.error('Temporäre Upload-Datei konnte nicht entfernt werden:', error));
+        }
+      }
+      const entry = {
+        id: crypto.randomUUID(),
+        filename: file,
+        uploadedAt: new Date().toISOString(),
+        destination,
+        size: bytes.byteLength,
+        html: decodeHtml(bytes)
+      };
+      this.uploadHistory = appendUpload(this.uploadHistory, entry);
+      const history = JSON.parse(JSON.stringify(this.uploadHistory));
+      // Serialize writes so simultaneous uploads cannot overwrite newer entries.
+      this.historyWrite = this.historyWrite.catch(() => {}).then(async () => {
+        await store.set('uploadHistory', history);
+        await store.save();
+      });
+      this.historyWrite.catch(error => {
+        console.error('Upload-Verlauf konnte nicht gespeichert werden:', error);
+        this.konsole.push('Upload-Verlauf konnte nicht lokal gespeichert werden.');
       });
       console.log('-----   upload:', res)
       //console.log(res)
-      if (res) {
+      {
 
         if (this.intervalToggle > 0) {
           this.intervalToggle--;
@@ -259,243 +291,50 @@ export default {
 </script>
 
 <template>
-
-
-<div>
-  <div class="container container-home" v-if="page == 'home'">
-    <div class="header">
-      <div class="logo"></div>
-    </div>
-    <div class="nav">
-        <button class="si-btn si-btn-icon si-btn-border icon-console" @click="handlerPage('console')"></button>
-        <button class="si-btn si-btn-icon si-btn-border icon-settings" @click="handlerPage('settings')"></button>
-    </div>
-    <div class="main">
-      
-      <div class="">
-        <div class="power" :class="{'active' : this.power == true}" @click="handlerPower"></div>
-        <div v-if="!this.power" class="mainMain"><b>Aus</b></div>
-        <div v-else-if="lastUpload" class="mainMain">Letzter Upload:<br>{{lastUpload}}</div>
-      </div>
-      <div @click="handlerSyncNow" class="si-btn si-btn-small si-btn-light">Sync ausführen</div>
-      
-    </div>
-    <footer>
-      <div v-if="intervalToggle > 1"><b>Status:</b> ({{intervalToggle}}) Daten werden übertragen...</div>
-      <div v-else-if="power">Synchronisierung alle {{intervalMin}} Minuten</div>
-      <div v-else>Synchronisierung: Aus</div>
-    </footer>
+  <div class="su-theme extension-ui updater-ui">
+    <header class="updater-titlebar">
+      <div class="updater-brand"><img src="./assets/style/logo.png" alt="Schule-Intern Vertretungsplan-Updater 2.x" title="Schule-Intern Vertretungsplan-Updater 2.x"></div>
+    </header>
+    <nav class="updater-navigation su-button-group" aria-label="Hauptnavigation">
+      <button v-for="item in [{id: 'home', label: 'Übersicht'}, {id: 'console', label: 'Protokoll'}, {id: 'uploads', label: 'Übertragungen'}, {id: 'settings', label: 'Einstellungen'}]" :key="item.id" class="su-button su-button-group__item" :aria-current="page === item.id ? 'page' : undefined" @click="handlerPage(item.id)">{{ item.label }}</button>
+    </nav>
+    <section class="updater-workspace">
+      <OverviewView v-if="page === 'home'" :model="$data" @power="handlerPower" @sync="handlerSyncNow" />
+      <ProtocolView v-else-if="page === 'console'" :model="$data" :log="getKonsole" />
+      <UploadsView v-else-if="page === 'uploads'" :entries="uploadHistory" />
+      <SettingsView v-else-if="page === 'settings'" :model="$data" @save="handlerSave" @folder="handlerFolder" />
+    </section>
+    <footer class="updater-footer" role="status">{{ intervalToggle > 0 ? 'Daten werden übertragen …' : power ? 'Automatische Synchronisierung aktiv' : 'Automatische Synchronisierung ausgeschaltet' }}</footer>
   </div>
-
-  <div class="container container-console" v-if="page == 'console'">
-    <div class="header">
-      <button class="si-btn si-btn-icon si-btn-border icon-back" @click="handlerPage('home')"></button>
-    </div>
-    <div class="nav"></div>
-    <div class="main">
-      <div class="console">
-        <p><b>Konsole:</b></p>
-        <div v-html="getKonsole"></div>
-      </div>
-    </div>
-  </div>
-
-  <div class="container container-settings" v-if="page == 'settings'">
-    <div class="header">
-      <button class="si-btn si-btn-icon si-btn-border icon-back" @click="handlerPage('home')"></button>
-      <button class="si-btn si-btn-icon si-btn-green margin-l-s icon-save" @click="handlerSave"></button>
-    </div>
-    <div class="nav"></div>
-    <div class="main">
-      <ul class="noListStyle">
-        <li>
-          <label>Interval in Minuten</label>
-          <input v-model="intervalMin" placeholder="120">
-          <div class="text-small">{{intervalTime}} Millisekunden</div>
-        </li>
-        <li>
-          <label>Lokaler Ordner</label>
-          <input v-model="folder" readonly @click="handlerFolder" class="curser">
-        </li>
-        <!--
-        <li>
-          <label>Ordner Prefix Lehrer/innen</label>
-          <input v-model="folderPrefixTeacher" placeholder="prefix_">
-        </li>
-        <li>
-          <label>Ordner Prefix Schüler/innen</label>
-          <input v-model="folderPrefixPupil" placeholder="prefix_">
-        </li>
-        -->
-        <li>
-          <label>API URL</label>
-          <input v-model="apiUrl" placeholder="https://www.....de/rest.php/vplan/updater">
-        </li>
-        <li>
-          <label>API Key</label>
-          <input v-model="apiKey">
-        </li>
-      </ul>
-    </div>
-    <footer>
-    </footer>
-  </div>
-
-
-</div>
-
 </template>
 
 <style>
-
-@import './assets/style/grid.css';
-@import './assets/style/style.css';
-@import './assets/style/si-components.css';
-
-footer {
-  padding-right: 0.6rem;
-  padding-left: 0.6rem;
-  padding-top: 0.2rem;
-  text-align: right;
-  font-size: 80%;
-  background: #222;
-  color: #ccc;
-  border-top: 1px solid #d2d6de;
-}
-.container {
-  width: 100%;
-  height: 100%;
-  display: grid;
-  grid-template-rows: 3rem 2rem calc(100vh - 6.4rem) 1.4rem;
-
-}
-
-.container .header {
-  display: flex;
-  padding-right: 0.6rem;
-  padding-left: 0.6rem;
-  background-color: #738b96;
-  box-shadow: rgba(0, 0, 0, 0.1) 0px 4px 6px -1px, rgba(0, 0, 0, 0.06) 0px 2px 4px -1px;
-}
-.container .nav {
-  background-color: #95a9b3;
-  box-shadow: rgba(0, 0, 0, 0.1) 0px 4px 6px -1px, rgba(0, 0, 0, 0.06) 0px 2px 4px -1px;
-  display: flex;
-  justify-content: flex-end;
-  align-items:center;
-  padding-right: 0.6rem;
-  padding-left: 0.6rem;
-  overflow: auto;
-}
-.container .nav button {
-  border: none;
-  border-radius: 0;
-}
-.container .nav button:hover {
-    background-color: #81929a;
-
-}
-.container .main {
-  display: grid;
-  justify-items:center;
-  align-items:center;
-  padding: 1rem;
-  overflow: auto;
-}
-.mainMain {
-  text-align: center;
-  padding-top: 1rem;
-  font-size: 90%;
-}
-
-.console {
-  width: 100%;
-  height: 100%;
-  font-size: 90%;
-  display: flex;
-  flex-direction: column;
-}
-
-
-.container-home .header {
-  justify-content: space-between;
-}
-
-
-.logo {
-  background-image: url('./assets/style/logo.png');
-  background-position: left center;
-  background-size: auto 100%;
-  background-repeat: no-repeat;
-  height: 95%;
-  width: 10rem;
-}
-
-.power {
-  cursor: pointer;
-  align-self: center;
-  background-image: url('./assets/style/icons/power-off-solid.svg');
-  background-position: center;
-  background-size: auto 100%;
-  background-repeat: no-repeat;
-  height: 30vw;
-  width: 30vw;
-}
-.power:hover {
-  opacity: 0.8;
-}
-
-.power.active {
-  background-image: url('./assets/style/icons/power-off-solid_green.svg');
-}
-
-.icon-settings {
-  background-image: url('./assets/style/icons/cogs-solid.svg');
-  background-position: center;
-  background-size: auto 45%;
-  background-repeat: no-repeat;
-  opacity: 0.6;
-}
-
-.icon-console {
-  background-image: url('./assets/style/icons/console-solid.svg');
-  background-position: center;
-  background-size: auto 45%;
-  background-repeat: no-repeat;
-  opacity: 0.6;
-}
-
-.icon-back {
-  background-image: url('./assets/style/icons/arrow-left-solid.svg');
-  background-position: center;
-  background-size: auto 50%;
-  background-repeat: no-repeat;
-}
-
-.icon-save {
-  background-image: url('./assets/style/icons/check-solid.svg');
-  background-position: center;
-  background-size: auto 50%;
-  background-repeat: no-repeat;
-}
-
-
-
-ul {
-  width: 100%;
-}
-
-ul li {
-  display: flex;
-  flex-direction: column;
-  padding-top:0.6rem;
-  padding-bottom:0.3rem;
-}
-
-ul li label {
-  padding-bottom:0.2rem;
-
-}
-
-
+@import './assets/schul-ui/schul-ui.css';
+* { box-sizing: border-box; }
+body { margin: 0; font-size: 14px; }
+button, input { font-family: inherit; }
+.updater-ui { min-height: 100vh; border: 0; display: flex; flex-direction: column; }
+.updater-titlebar { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 10px 24px; background: #738b96; border-bottom: 1px solid var(--su-color-border); }
+.updater-brand { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+.updater-brand img { display: block; width: 174px; max-width: 100%; height: auto; }
+.updater-brand > span, .updater-version { color: var(--su-color-muted); font-size: 12px; }
+.updater-navigation { flex-wrap: wrap; display: flex; max-width: none; padding-left: 24px; }
+.updater-workspace { flex: 1; }
+.updater-workspace > .su-split-view { min-height: 100%; }
+.updater-side-panel { align-self: start; padding-top: 0; padding-bottom: 24px; }
+.updater-content { display: grid; gap: var(--su-space-3); }
+.updater-summary { display: grid; justify-items: start; gap: 20px; }
+.updater-sync-icon { padding: 16px; border-radius: var(--su-radius-panel); background: var(--su-color-surface-soft); color: var(--su-color-muted); }
+.updater-sync-icon.is-active { color: var(--su-color-primary); background: var(--su-color-primary-soft); }
+.updater-sync-icon svg { width: 32px; height: 32px; display: block; }
+.updater-last-upload { display: grid; gap: 4px; padding-top: 16px; width: 100%; border-top: 1px solid var(--su-color-border); }
+.updater-folder { overflow-wrap: anywhere; }
+.updater-status { display: grid; grid-template-columns: 100px minmax(0, 1fr); gap: 6px 12px; font-size: 13px; margin: 12px 0 0; }
+.updater-status dt { color: var(--su-color-muted); }
+.updater-status dd { margin: 0; overflow-wrap: anywhere; font-weight: 600; }
+.updater-success { color: var(--su-color-primary); }
+.updater-console { min-height: 280px; max-height: 60vh; overflow: auto; overflow-wrap: anywhere; font: 12px/1.9 ui-monospace, SFMono-Regular, Consolas, monospace; }
+.updater-footer { padding: 8px 24px; border-top: 1px solid var(--su-color-border); background: var(--su-color-surface-soft); color: var(--su-color-text-soft); font-size: 12px; }
+@media (max-width: 960px) { .updater-side-panel { margin: 0 24px; padding-top: 0; } }
+@media (max-width: 480px) { .updater-version { display: none; } .updater-titlebar { padding: 10px 24px; } .updater-navigation { padding-left: 0; } .updater-navigation .su-button { flex: 1; padding-inline: 12px; } }
 </style>
